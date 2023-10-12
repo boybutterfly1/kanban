@@ -32,7 +32,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="list" v-for="board in kanbanStore.boards">
+          <tr
+              class="list"
+              v-for="board in kanbanStore.boards"
+              @click="router.push(`/board${board.id}`)"
+          >
             <td>{{board.name}}</td>
             <td>{{board.id}}</td>
             <td>{{board.owner}}</td>
@@ -74,13 +78,14 @@ import {ref} from "vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import {Board, Column, User} from "@/types/types";
 import {useUsersStore} from "@/store/users";
+import router from "@/router";
 
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
 const searchValue = ref<string>('')
 const createFormIsOpen = ref<boolean>(false)
 const newBoard = ref<Board>({
-  id: Date.now(),
+  id: 0,
   name: "",
   owner: usersStore.currentUser ? usersStore.currentUser.username : null,
   columns: []
@@ -88,8 +93,11 @@ const newBoard = ref<Board>({
 
 function createBoard() {
   if (newBoard.value.name) {
-    kanbanStore.boards.push(newBoard.value)
+    newBoard.value.id = Date.now()
+    kanbanStore.boards.push({...newBoard.value})
   }
+  createFormIsOpen.value = false
+  newBoard.value.name = ''
 }
 </script>
 

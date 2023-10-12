@@ -1,7 +1,7 @@
 <template>
   <div>
     <board-comp
-        :board="board"
+        :board="currentBoard"
     />
   </div>
 </template>
@@ -11,9 +11,12 @@ import BoardComp from "@/components/BoardComp.vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board} from "@/types/types";
 import {ref} from "vue";
+import {useRoute} from "vue-router";
 
+const route = useRoute()
 const kanbanStore = useKanbanStore()
-const board = ref<Board>(kanbanStore.board1)
+const currentBoardId = ref<number>(+(route.params.id))
+const currentBoard = kanbanStore.boards.find(board => board.id === currentBoardId.value)
 </script>
 
 <style lang="sass" scoped>

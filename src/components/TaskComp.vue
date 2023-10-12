@@ -23,13 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import {Status, Task} from "@/types/types";
+import {Task} from "@/types/types";
 
 const props = defineProps<{
   task: Task
 }>()
 
-function getStatusClass(status: Status): string {
+function getStatusClass(status: string): string {
     return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
 </script>

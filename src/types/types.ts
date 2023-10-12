@@ -14,11 +14,11 @@ export interface Task {
   id: number
   title: string
   description: string | null
-  status: Status
+  status: string
   statusChangeDate?: string
   startDate: string
   deadlineDate?: string
-  priority: Priority
+  priority: string
   author: string
 }
 export interface User {
@@ -28,16 +28,7 @@ export interface User {
   password: string
   regDate: string
 }
-export enum Priority {
-  trivial = 'Trivial',
-  minor = 'Minor',
-  normal = 'Normal',
-  critical = 'Critical',
-  blocker = 'Blocker'
-}
-export enum Status {
-  open = 'Open',
-  inProgress = 'In Progress',
-  needInfo = 'Need Info',
-  closed = 'Closed',
+export interface Option {
+  value: string
+  title: string
 }
