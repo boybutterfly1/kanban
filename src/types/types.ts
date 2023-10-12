@@ -1,7 +1,7 @@
 export interface Board {
   id: number
   name: string
-  owner: User | string
+  owner: string | null
   columns: Column[]
 }
 export interface Column {

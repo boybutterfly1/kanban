@@ -15,12 +15,12 @@
             type="password"
             placeholder="Password"
         />
-        <button
+        <my-button
           @click="login(user)"
           type="submit"
         >
           Login
-        </button>
+        </my-button>
         <span @click="changeInputs">Registration</span>
       </form>
       <form
@@ -47,12 +47,12 @@
             @input="validatePassword"
         />
         <div class="error" v-if="!isPasswordValid">{{passwordError}}</div>
-        <button
+        <my-button
             @click="register(user)"
             type="submit"
         >
           Register
-        </button>
+        </my-button>
         <span @click="changeInputs">Login</span>
       </form>
   </div>
@@ -64,6 +64,7 @@ import {User} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
 import MyInput from "@/components/UI/MyInput.vue";
+import MyButton from "@/components/UI/MyButton.vue";
 
 const usersStore = useUsersStore()
 const isRegistered = ref<boolean>(true)
@@ -98,6 +99,7 @@ function login(currentUser: User) {
     usersStore.currentUser = user;
     usersStore.isLoggedIn = true;
     router.push('/')
+    console.log(usersStore.currentUser.username)
   }
 }
 function register(currentUser: User) {
@@ -123,18 +125,6 @@ function register(currentUser: User) {
     display: flex
     flex-direction: column
     align-items: center
-    & button
-      margin: 5px 0 10px
-      padding: 5px 10px
-      font-family: 'Open Sans', sans-serif
-      font-size: 14px
-      cursor: pointer
-      border-radius: 5px
-      border: 0
-      background-color: #3f74e3
-      color: white
-      &:hover
-        background-color: #2953ab
     & span
       font-size: 13px
       cursor: pointer

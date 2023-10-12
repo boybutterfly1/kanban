@@ -5,7 +5,13 @@
         <span>{{board.name}}</span>
       </div>
       <div class="board__header__options">
-        <div><input></div>
+        <div>
+          <my-input
+              v-model="searchValue"
+              type="text"
+              placeholder="Search"
+          />
+        </div>
         <div>Sort by</div>
         <div>Filters</div>
       </div>
@@ -19,22 +25,26 @@
           <img width="30" height="30" src="https://img.icons8.com/ios/50/000000/plus--v1.png" alt="plus--v1"/>
       </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
 import {Board} from "@/types/types";
-
+import {ref} from "vue";
+import MyInput from "@/components/UI/MyInput.vue";
+import MyPopup from "@/components/UI/MyPopup.vue";
 const props = defineProps<{
   board: Board
 }>()
+const searchValue = ref<string>()
 </script>
 
 <style lang="sass" scoped>
 .board
   display: flex
   flex-direction: column
-  padding: 20px
+  padding: 40px
   &__header
     display: flex
     justify-content: space-between
