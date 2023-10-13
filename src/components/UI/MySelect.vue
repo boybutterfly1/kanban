@@ -3,10 +3,11 @@
       :value="modelValue"
       @change="$emit('update:modelValue', $event.target.value)"
   >
+    <option disabled selected value="">{{selectName}}</option>
     <option
         v-for="option in getOptions(props.array)"
         :key="option.value"
-        :value="option.value"
+        :value="option.label"
     >
         {{option.label}}
     </option>
@@ -17,8 +18,9 @@
 import {Option} from "@/types/types";
 
 const props = defineProps<{
-  modelValue: string[]
+  modelValue: string
   array: string[]
+  selectName : string
 }>()
 function getOptions(array: string[]) {
   if (array) {
@@ -30,7 +32,14 @@ function getOptions(array: string[]) {
 </script>
 
 <style lang="sass" scoped>
-
+select
+  margin-bottom: 5px
+  font-family: 'Open Sans', sans-serif
+  border-radius: 5px
+  border: 1px solid #d9d9d9
+  color: #757575
+  &:focus
+    outline: none
 </style>
 
 
