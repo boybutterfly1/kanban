@@ -20,7 +20,10 @@
       <div class="board__container">
         <column-comp
             v-for="column in board.columns"
+            :key="column.id"
             :column="column"
+            :board="props.board"
+
         />
           <img
               class="btn"
@@ -66,17 +69,17 @@
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
 import {Board, Column, Task} from "@/types/types";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MySelect from "@/components/UI/MySelect.vue";
 import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
+import {prop} from "vue-class-component";
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   board: Board
 }>()
-
 const newColumn = ref<Column>({
   id: null,
   name: '',
@@ -113,6 +116,7 @@ function addNewColumn() {
     newColumnPopupClose()
   }
 }
+
 </script>
 
 <style lang="sass" scoped>
@@ -167,3 +171,4 @@ hr
   height: 1px
   background-color: #b7b6b6
 </style>
+@drop="handleDrop(column.id)"

@@ -2,7 +2,6 @@
   <div class="auth">
       <form
         v-if="isRegistered"
-        class="auth__login"
       >
         <my-input
             v-model="user.login"

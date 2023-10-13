@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: string
+  modelValue: string | undefined
 }>()
 </script>
 

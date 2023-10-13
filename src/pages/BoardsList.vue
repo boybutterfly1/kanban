@@ -15,7 +15,7 @@
           <div>Sort by</div>
         </div>
         <div class="boards__header__bar__button>">
-          <my-button @click="createFormIsOpen = true">
+          <my-button @click="createBoardPopupIsOpen = true">
             Create Board
           </my-button>
         </div>
@@ -50,10 +50,10 @@
     </div>
   </div>
   <my-popup
-      :is-open="createFormIsOpen"
-      @close="createFormIsOpen = false"
+      :is-open="createBoardPopupIsOpen"
+      @close="createBoardPopupIsOpen = false"
   >
-    <form class="creating-board" @submit.prevent>
+    <form class="new-board" @submit.prevent>
       <span>Creating board</span>
       <my-input
           v-model="newBoard.name"
@@ -79,24 +79,24 @@ import MyPopup from "@/components/UI/MyPopup.vue";
 import {Board, Column, User} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
-
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
-const searchValue = ref<string>('')
-const createFormIsOpen = ref<boolean>(false)
 const newBoard = ref<Board>({
-  id: 0,
+  id: null,
   name: "",
   owner: usersStore.currentUser ? usersStore.currentUser.username : null,
   columns: []
 })
+
+const createBoardPopupIsOpen = ref<boolean>(false)
+const searchValue = ref<string>('')
 
 function createBoard() {
   if (newBoard.value.name) {
     newBoard.value.id = Date.now()
     kanbanStore.boards.push({...newBoard.value})
   }
-  createFormIsOpen.value = false
+  createBoardPopupIsOpen.value = false
   newBoard.value.name = ''
 }
 </script>
@@ -149,16 +149,15 @@ table
         &:nth-child(4)
           width: 10%
           text-align: right
+.new-board
+  display: flex
+  flex-direction: column
+  justify-content: center
+  & span
+    margin-bottom: 15px
 hr
   width: 100%
   border: 0
   height: 1px
   background-color: #b7b6b6
-.creating-board
-  display: flex
-  flex-direction: column
-  justify-content: center
-  align-items: center
-  & span
-    margin-bottom: 15px
 </style>

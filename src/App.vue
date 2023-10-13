@@ -16,5 +16,6 @@
 .app
   font-family: 'Open Sans', sans-serif
   background-color: #e8ebef
-  height: 100vh
+  min-height: 100vh
+
 </style>

@@ -1,5 +1,8 @@
 <template>
-  <div class="task">
+  <div class="task"
+       draggable="true"
+       @dragstart="$emit('drag-start', $event, task.id)"
+  >
     <div class="task__header">
       <div class="popup">
         <img src="https://img.icons8.com/ios-glyphs/30/000000/user--v1.png" alt="username" class="popup__trigger">
@@ -32,6 +35,9 @@ const props = defineProps<{
 function getStatusClass(status: string): string {
     return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
+// function handleDragStart(event: DragEvent, taskId: number | null) {
+//   emit('drag-start', event, taskId)
+// }
 </script>
 
 <style lang="sass" scoped>
@@ -53,6 +59,10 @@ function getStatusClass(status: string): string {
     justify-content: space-between
     & img
       width: 17px
+      cursor: pointer
+      border-radius: 5px
+      &:hover
+        background-color: #a7adb2
     &__id
       width: 120px
     & span

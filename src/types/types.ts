@@ -1,25 +1,26 @@
 export interface Board {
-  id: number
+  id: number | null
   name: string
   owner: string | null
   columns: Column[]
 }
 export interface Column {
-  id: number
+  id: number | null
   name: string
-  statuses : string[] | null
+  statuses : string[]
   tasksList: Task[]
 }
 export interface Task {
-  id: number
+  id: number | null
   title: string
   description: string | null
   status: string
   statusChangeDate?: string
-  startDate: string
+  startDate: string | null
   deadlineDate?: string
   priority: string
-  author: string
+  author: string | null
+  columnId: number | null
 }
 export interface User {
   id: number

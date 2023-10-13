@@ -34,6 +34,6 @@ const props = defineProps<{
   left: 50%
   transform: translate(-50%, -50%)
   background-color: white
-  padding: 10px
+  padding: 15px
   border-radius: 5px
 </style>

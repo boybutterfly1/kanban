@@ -1,5 +1,11 @@
 <template>
-  <div class="column">
+  <div
+    class="column"
+    @dragover.prevent
+    @dragenter.prevent
+    @drop="onDrop($event, column.id)"
+
+  >
     <div class="column__header">
       <div class="column__header__name">
         <span>{{column.name}}</span>
@@ -17,7 +23,9 @@
     <hr>
     <task-comp
         v-for="task in column.tasksList"
+        :key="task.id"
         :task="task"
+        @drag-start="startDrag"
     />
     <button
       @click="newTaskPopupIsOpen = true"
@@ -62,17 +70,19 @@
 <script setup lang="ts">
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
-import {Column, Task} from "@/types/types";
-import {ref} from "vue";
+import {Board, Column, Task} from "@/types/types";
+import {computed, ref} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MyButton from "@/components/UI/MyButton.vue";
 import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
+
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   column: Column
+  board: Board
 }>()
 
 const newTask = ref<Task>({
@@ -82,9 +92,9 @@ const newTask = ref<Task>({
   status: '',
   startDate: null,
   priority: '',
-  author: usersStore.currentUser? usersStore.currentUser.username : null
+  author: usersStore.currentUser? usersStore.currentUser.username : null,
+  columnId: null
 })
-
 const newTaskPopupIsOpen = ref<boolean>(false)
 
 function newTaskPopupClose() {
@@ -96,8 +106,49 @@ function addNewTask() {
   if (newTask.value.title && newTask.value.status && newTask.value.priority) {
     newTask.value.id = Date.now()
     newTask.value.startDate = new Date().toDateString()
+    newTask.value.columnId = props.column.id
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
+  }
+}
+
+const draggedTask = ref<Task | null>(null)
+function getDraggingTask(taskId: number | null) {
+  props.board.columns.forEach((column: Column) => {
+    if (column.tasksList.find((task: Task) => task.id === taskId)) {
+      draggedTask.value = column.tasksList.find((task: Task) => task.id === taskId)
+    }
+  })
+}
+function deleteTaskFromPrevColumn(prevColumnId: number | null) {
+  const prevColumn = props.board.columns.find((column: Column) => column.id === prevColumnId)
+  if (prevColumn) {
+    prevColumn.tasksList = prevColumn.tasksList.filter((task: Task) => task.id !== draggedTask.value)
+  }
+}
+function handleDrop(id: number | null) {
+  deleteTaskFromPrevColumn(draggedTask.value.columnId)
+  let column = null
+  column = props.board?.columns.find((column: Column) => column.id === id)
+  if (column && draggedTask.value) {
+    draggedTask.value.columnId = column.id
+    column.tasksList.push({...draggedTask.value})
+  }
+}
+function startDrag(event: DragEvent, taskId: number) {
+  const dataTransfer = event.dataTransfer
+  if (dataTransfer) {
+    dataTransfer.dropEffect = "move"
+    dataTransfer.effectAllowed = 'move'
+    dataTransfer.setData('taskId', taskId.toString())
+  }
+}
+function onDrop(event: DragEvent, columnId: number | null) {
+  const dataTransfer = event.dataTransfer
+  if (dataTransfer) {
+    const taskId = dataTransfer.getData('taskId')
+    getDraggingTask(+taskId)
+    handleDrop(columnId)
   }
 }
 </script>
@@ -157,3 +208,4 @@ hr
   height: 1px
   background-color: #b7b6b6
 </style>
+
