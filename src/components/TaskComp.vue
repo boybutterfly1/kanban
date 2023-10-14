@@ -1,5 +1,7 @@
 <template>
   <div class="task"
+       @click="taskDetailsIsOpen = !taskDetailsIsOpen"
+       :class="{ 'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen}"
        draggable="true"
        @dragstart="onDrag($event, task? task.id: null)"
   >
@@ -12,9 +14,9 @@
       </div>
       <span class="task__header__id">{{task.id}}</span>
       <span>{{task.priority}}</span>
-      <img src="https://img.icons8.com/ios-glyphs/30/000000/more.png" alt="">
+      <img src="https://img.icons8.com/ios-glyphs/30/000000/more.png" alt="taskDetails">
     </div>
-    <span class="task__title">{{task.title}}</span>
+    <span class="task__title">{{task.name}}</span>
     <div class="task__status">
       <div
         :class="getStatusClass(task.status)"
@@ -23,11 +25,16 @@
       </div>
     </div>
   </div>
+  <div :class="{ 'menu-open': taskDetailsIsOpen }" class="side-menu">
+    {{task.name}}
+  </div>
 </template>
 
 <script setup lang="ts">
 import {Task} from "@/types/types";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
+import {computed, ref} from "vue";
+const taskDetailsIsOpen = ref<boolean>(false)
 const dragAndDropStore = useTaskDragAndDropStore()
 const props = defineProps<{
   task: Task
@@ -45,7 +52,7 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
 .task
   width: 250px
   height: 100px
-  border-radius: 8px
+  border-radius: 15px
   border: 1px solid #d9d9d9
   display: flex
   flex-direction: column
@@ -53,7 +60,6 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
   box-shadow: 5px 5px 10px rgba(0,0,0,0.1)
   transition: 0.3s ease
   padding: 15px 15px
-  background-color: white
   cursor: grab
   &__header
     display: flex
@@ -69,6 +75,10 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
       width: 120px
     & span
         font-size: 12px
+  &__details-open
+    background-color: #ddeaf6
+  &__details-closed
+    background-color: white
   &:hover
     background-color: gainsboro
   &__title
@@ -104,4 +114,17 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
     font-size: 12px
   &__trigger:hover + &__content
     display: block
+.side-menu
+  border-left: 7px solid #ddeaf6
+  width: 500px
+  height: 100%
+  position: fixed
+  top: 0
+  right: -500px
+  background: white
+  transition: right 0.5s
+  overflow-y: auto
+.menu-open
+  right: 0
+
 </style>

@@ -1,10 +1,9 @@
 <template>
   <div
-    class="column"
-    @dragover.prevent
-    @dragenter.prevent
-    @drop="onDrop($event, column? column.id: null)"
-
+      class="column"
+      @dragover.prevent
+      @dragenter.prevent
+      @drop="onDrop($event, column? column.id: null)"
   >
     <div class="column__header">
       <div class="column__header__name">
@@ -13,7 +12,7 @@
       </div>
       <div class="column__header__buttons">
         <img
-            @click="popupsFlagsStore.newTaskPopupIsOpen = true"
+            @click="newTaskPopupIsOpen = true"
             src="https://img.icons8.com/ios/50/000000/plus-math--v1.png"
             alt="add task"
         >
@@ -22,12 +21,12 @@
     </div>
     <hr>
     <task-comp
-        v-for="task in column.tasksList"
-        :key="task.id"
-        :task="task"
+      v-for="task in searchTasks"
+      :key="task.id"
+      :task="task"
     />
     <button
-      @click="newTaskPopupIsOpen = true;
+        @click="newTaskPopupIsOpen = true;
       console.log('Add task id', column.id, 'Add task statuses', column.statuses)"
     >
       <img width="17" src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
@@ -40,7 +39,7 @@
   >
     <form class="new-task" @submit.prevent>
       <my-input
-          v-model="newTask.title"
+          v-model="newTask.name"
           type="text"
           placeholder="Task title"
       />
@@ -49,11 +48,18 @@
           placeholder="Task description"
       />
       <my-select
+          v-if="column.statuses.length > 1"
           :array="column.statuses"
           v-model="newTask.status"
           select-name="Task status"
           @change="
           console.log('change id', column.id, 'change statuses', column.statuses)"
+      />
+      <my-input
+          v-else
+          disabled
+          :placeholder="column.statuses[0]"
+          v-model="newTask.status"
       />
       <my-select
           :array="kanbanStore.priorities"
@@ -73,7 +79,7 @@
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board, Column, Task} from "@/types/types";
-import {onMounted, ref, watch} from "vue";
+import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MyButton from "@/components/UI/MyButton.vue";
@@ -88,29 +94,42 @@ const kanbanStore = useKanbanStore()
 const props = defineProps<{
   column: Column
   board: Board
+
 }>()
 const newTask = ref<Task>({
   id: 0,
-  title: '',
+  name: '',
   description: '',
   status: '',
-  startDate: null,
+  startDate: '',
   priority: '',
   author: usersStore.currentUser? usersStore.currentUser.username : null,
   columnId: null
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
+
+const searchTasks = computed<Task[]>(() => {
+  return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
+})
 function newTaskPopupClose() {
-  newTask.value.title = ''
+  newTask.value.name = ''
   newTask.value.description = ''
   newTask.value.status = ''
   newTask.value.priority = ''
   newTaskPopupIsOpen.value = false
 }
 function addNewTask() {
-  if (newTask.value.title && newTask.value.status && newTask.value.priority) {
+  if (newTask.value.name && newTask.value.status && newTask.value.priority) {
     newTask.value.id = Date.now()
-    newTask.value.startDate = new Date().toDateString()
+    newTask.value.startDate = new Date().toLocaleString()
+    newTask.value.columnId = props.column.id
+    props.column.tasksList.push({...newTask.value})
+    newTaskPopupClose()
+  }
+  if (newTask.value.name && newTask.value.priority && props.column.statuses.length === 1) {
+    newTask.value.status = props.column.statuses[0]
+    newTask.value.id = Date.now()
+    newTask.value.startDate = new Date().toLocaleString()
     newTask.value.columnId = props.column.id
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
@@ -120,8 +139,8 @@ function onDrop(event: DragEvent, dropColumnId: number | null) {
   dropColumnId? dragAndDropStore.onDrop(event, dropColumnId) : null
   dragAndDropStore.board = props.board
 }
-onMounted(() => {
-  console.log('Column added',props.column.id)
+onUnmounted(() => {
+  kanbanStore.searchValue = ''
 })
 </script>
 

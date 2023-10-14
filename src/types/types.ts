@@ -13,11 +13,11 @@ export interface Column {
 }
 export interface Task {
   id: number | null
-  title: string
+  name: string
   description: string | null
   status: string
   statusChangeDate?: string
-  startDate: string | null
+  startDate: string
   deadlineDate?: string
   priority: string
   author: string | null

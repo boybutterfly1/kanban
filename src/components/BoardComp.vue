@@ -7,9 +7,9 @@
       <div class="board__header__options">
         <div>
           <my-input
-              v-model="searchValue"
-              type="text"
-              placeholder="Search"
+            v-model="kanbanStore.searchValue"
+            type="text"
+            placeholder="Search by task"
           />
         </div>
         <div>Sort by</div>
@@ -22,7 +22,7 @@
           v-for="column in board.columns"
           :key="column.id"
           :column="column"
-          :board="props.board"
+          :board="board"
         />
           <img
             class="btn"
@@ -33,28 +33,28 @@
       </div>
   </div>
   <my-popup
-      :is-open="popupsFlagsStore.newColumnPopupIsOpen"
-      @close="newColumnPopupClose"
+    :is-open="popupsFlagsStore.newColumnPopupIsOpen"
+    @close="newColumnPopupClose"
   >
     <form @submit.prevent class="new-column">
       <my-select
-          v-model="selectedStatus"
-          :array="props.board.availableStatuses"
-          @change="addStatus(selectedStatus)"
-          select-name="Column statuses"
+        v-model="selectedStatus"
+        :array="props.board.availableStatuses"
+        @change="addStatus(selectedStatus)"
+        select-name="Column statuses"
       />
       <div class="new-column__statuses">
         <button
-            v-for="status in newColumn.statuses"
-            @click="deleteStatus(status)"
+          v-for="status in newColumn.statuses"
+          @click="deleteStatus(status)"
         >
           {{status}}
         </button>
       </div>
       <my-input
-          v-model="newColumn.name"
-          type="text"
-          placeholder="Column name"
+        v-model="newColumn.name"
+        type="text"
+        placeholder="Column name"
       />
       <my-button
         @click="addNewColumn"
@@ -63,6 +63,8 @@
       </my-button>
     </form>
   </my-popup>
+
+
 </template>
 
 <script setup lang="ts">
@@ -75,6 +77,7 @@ import MySelect from "@/components/UI/MySelect.vue";
 import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
+
 const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
@@ -88,7 +91,6 @@ const newColumn = ref<Column>({
 })
 
 const selectedStatus = ref<string>('')
-const searchValue = ref<string>('')
 
 function addStatus(newStatus:string) {
   newColumn.value.statuses.push(newStatus)

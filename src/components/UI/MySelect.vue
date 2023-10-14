@@ -9,7 +9,7 @@
         :key="option.value"
         :value="option.label"
     >
-        {{option.label}}
+      {{option.label}}
     </option>
   </select>
 </template>
@@ -41,7 +41,3 @@ select
   &:focus
     outline: none
 </style>
-
-
-
-

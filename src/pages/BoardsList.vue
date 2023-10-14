@@ -8,9 +8,9 @@
       <div class="boards__header__bar">
         <div class="boards__header__bar__options">
           <my-input
-              v-model="searchValue"
+              v-model="kanbanStore.searchValue"
               type="text"
-              placeholder="Search"
+              placeholder="Search by board"
           />
           <div>Sort by</div>
         </div>
@@ -34,7 +34,7 @@
         <tbody>
           <tr
               class="list"
-              v-for="board in kanbanStore.boards"
+              v-for="board in searchBoards"
               @click="router.push(`/board${board.id}`)"
           >
             <td>{{board.name}}</td>
@@ -74,9 +74,9 @@
 import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
 import MyInput from "@/components/UI/MyInput.vue";
-import {ref} from "vue";
+import {computed, onUnmounted, ref} from "vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
-import {Board} from "@/types/types";
+import {Board, Task} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
@@ -90,9 +90,9 @@ const newBoard = ref<Board>({
   columns: [],
   availableStatuses : [...kanbanStore.statuses]
 })
-
-const searchValue = ref<string>('')
-
+const searchBoards = computed<Board[]>(() => {
+  return kanbanStore.boards.filter((board: Board) => board.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
+})
 function createBoard() {
   if (newBoard.value.name) {
     newBoard.value.id = Date.now()
@@ -106,6 +106,9 @@ function createBoardPopupClose() {
   popupFlagsStore.createBoardPopupIsOpen = false
   newBoard.value.name = ''
 }
+onUnmounted(() => {
+  kanbanStore.searchValue = ''
+})
 </script>
 
 <style lang="sass" scoped>

@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
-import {ref} from "vue";
-import {Board, Column} from "@/types/types";
+import {computed, ref} from "vue";
+import {Board, Column, Task} from "@/types/types";
 import router from "@/router";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
 
@@ -9,6 +9,17 @@ export const useKanbanStore = defineStore('kanban', () => {
   const priorities: string[] = ['Trivial', 'Minor', 'Normal', 'Critical', 'Blocker']
   const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Closed']
   const boards = ref<Board[]>([])
+  const searchValue = ref<string>('')
+  const searchTasks = computed<Task[]>((array: Task[]) => {
+    return array.filter((task: Task) => task.name.toLowerCase().includes(searchValue.value.toLowerCase()))
+  })
+  const searchBoards = computed<Board[]>((array: Board[]) => {
+    return array.filter((board: Board) => board.name.toLowerCase().includes(searchValue.value.toLowerCase()))
+  })
+  // const search = computed<Task[] | Board[]>((array: Task[] | Board[]) => {
+  //   return array.filter((item: Task | Board) => item.name.toLowerCase().includes(searchValue.value.toLowerCase()))
+  // })
+
   // function createBoard(newBoard: Board) {
   //   newBoard.id = Date.now()
   //   boards.value.push({...newBoard})
@@ -24,6 +35,9 @@ export const useKanbanStore = defineStore('kanban', () => {
     boards,
     priorities,
     statuses,
+    searchValue,
+    searchTasks,
+    searchBoards,
     // createBoard,
     // addNewColumn
   }
