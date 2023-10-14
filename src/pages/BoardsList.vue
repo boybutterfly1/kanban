@@ -15,7 +15,7 @@
           <div>Sort by</div>
         </div>
         <div class="boards__header__bar__button>">
-          <my-button @click="createBoardPopupIsOpen = true">
+          <my-button @click="popupFlagsStore.createBoardPopupIsOpen = true">
             Create Board
           </my-button>
         </div>
@@ -50,8 +50,8 @@
     </div>
   </div>
   <my-popup
-      :is-open="createBoardPopupIsOpen"
-      @close="createBoardPopupIsOpen = false"
+      :is-open="popupFlagsStore.createBoardPopupIsOpen"
+      @close="createBoardPopupClose"
   >
     <form class="new-board" @submit.prevent>
       <span>Creating board</span>
@@ -76,27 +76,34 @@ import MyButton from "@/components/UI/MyButton.vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import {ref} from "vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
-import {Board, Column, User} from "@/types/types";
+import {Board} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
+import {usePopupsFlagsStore} from "@/store/popupsFlags";
+const popupFlagsStore = usePopupsFlagsStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
 const newBoard = ref<Board>({
   id: null,
   name: "",
   owner: usersStore.currentUser ? usersStore.currentUser.username : null,
-  columns: []
+  columns: [],
+  availableStatuses : [...kanbanStore.statuses]
 })
 
-const createBoardPopupIsOpen = ref<boolean>(false)
 const searchValue = ref<string>('')
 
 function createBoard() {
   if (newBoard.value.name) {
     newBoard.value.id = Date.now()
     kanbanStore.boards.push({...newBoard.value})
+    popupFlagsStore.createBoardPopupIsOpen = false
+    router.push(`/board${newBoard.value.id}`)
+    createBoardPopupClose()
   }
-  createBoardPopupIsOpen.value = false
+}
+function createBoardPopupClose() {
+  popupFlagsStore.createBoardPopupIsOpen = false
   newBoard.value.name = ''
 }
 </script>

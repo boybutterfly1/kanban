@@ -3,6 +3,7 @@ export interface Board {
   name: string
   owner: string | null
   columns: Column[]
+  availableStatuses: string[]
 }
 export interface Column {
   id: number | null

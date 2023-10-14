@@ -5,7 +5,7 @@
   >
     <option disabled selected value="">{{selectName}}</option>
     <option
-        v-for="option in getOptions(props.array)"
+        v-for="option in getOptions(array)"
         :key="option.value"
         :value="option.label"
     >

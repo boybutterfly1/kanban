@@ -1,7 +1,7 @@
 <template>
   <div class="task"
        draggable="true"
-       @dragstart="$emit('drag-start', $event, task.id)"
+       @dragstart="onDrag($event, task? task.id: null)"
   >
     <div class="task__header">
       <div class="popup">
@@ -27,7 +27,8 @@
 
 <script setup lang="ts">
 import {Task} from "@/types/types";
-
+import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
+const dragAndDropStore = useTaskDragAndDropStore()
 const props = defineProps<{
   task: Task
 }>()
@@ -35,9 +36,9 @@ const props = defineProps<{
 function getStatusClass(status: string): string {
     return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
-// function handleDragStart(event: DragEvent, taskId: number | null) {
-//   emit('drag-start', event, taskId)
-// }
+function onDrag(event: DragEvent, dragTaskId: number | null) {
+  dragTaskId? dragAndDropStore.onDrag(event, dragTaskId) : null
+}
 </script>
 
 <style lang="sass" scoped>
@@ -53,6 +54,7 @@ function getStatusClass(status: string): string {
   transition: 0.3s ease
   padding: 15px 15px
   background-color: white
+  cursor: grab
   &__header
     display: flex
     align-items: center

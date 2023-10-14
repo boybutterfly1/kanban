@@ -3,7 +3,7 @@
     class="column"
     @dragover.prevent
     @dragenter.prevent
-    @drop="onDrop($event, column.id)"
+    @drop="onDrop($event, column? column.id: null)"
 
   >
     <div class="column__header">
@@ -13,7 +13,7 @@
       </div>
       <div class="column__header__buttons">
         <img
-            @click="newTaskPopupIsOpen = true"
+            @click="popupsFlagsStore.newTaskPopupIsOpen = true"
             src="https://img.icons8.com/ios/50/000000/plus-math--v1.png"
             alt="add task"
         >
@@ -25,10 +25,10 @@
         v-for="task in column.tasksList"
         :key="task.id"
         :task="task"
-        @drag-start="startDrag"
     />
     <button
-      @click="newTaskPopupIsOpen = true"
+      @click="newTaskPopupIsOpen = true;
+      console.log('Add task id', column.id, 'Add task statuses', column.statuses)"
     >
       <img width="17" src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
       <span>Add task</span>
@@ -52,6 +52,8 @@
           :array="column.statuses"
           v-model="newTask.status"
           select-name="Task status"
+          @change="
+          console.log('change id', column.id, 'change statuses', column.statuses)"
       />
       <my-select
           :array="kanbanStore.priorities"
@@ -71,20 +73,22 @@
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board, Column, Task} from "@/types/types";
-import {computed, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MyButton from "@/components/UI/MyButton.vue";
 import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
-
+import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
+import {usePopupsFlagsStore} from "@/store/popupsFlags";
+const popupsFlagsStore = usePopupsFlagsStore()
+const dragAndDropStore = useTaskDragAndDropStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   column: Column
   board: Board
 }>()
-
 const newTask = ref<Task>({
   id: 0,
   title: '',
@@ -96,10 +100,11 @@ const newTask = ref<Task>({
   columnId: null
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
-
 function newTaskPopupClose() {
   newTask.value.title = ''
   newTask.value.description = ''
+  newTask.value.status = ''
+  newTask.value.priority = ''
   newTaskPopupIsOpen.value = false
 }
 function addNewTask() {
@@ -111,46 +116,13 @@ function addNewTask() {
     newTaskPopupClose()
   }
 }
-
-const draggedTask = ref<Task | null>(null)
-function getDraggingTask(taskId: number | null) {
-  props.board.columns.forEach((column: Column) => {
-    if (column.tasksList.find((task: Task) => task.id === taskId)) {
-      draggedTask.value = column.tasksList.find((task: Task) => task.id === taskId)
-    }
-  })
+function onDrop(event: DragEvent, dropColumnId: number | null) {
+  dropColumnId? dragAndDropStore.onDrop(event, dropColumnId) : null
+  dragAndDropStore.board = props.board
 }
-function deleteTaskFromPrevColumn(prevColumnId: number | null) {
-  const prevColumn = props.board.columns.find((column: Column) => column.id === prevColumnId)
-  if (prevColumn) {
-    prevColumn.tasksList = prevColumn.tasksList.filter((task: Task) => task.id !== draggedTask.value)
-  }
-}
-function handleDrop(id: number | null) {
-  deleteTaskFromPrevColumn(draggedTask.value.columnId)
-  let column = null
-  column = props.board?.columns.find((column: Column) => column.id === id)
-  if (column && draggedTask.value) {
-    draggedTask.value.columnId = column.id
-    column.tasksList.push({...draggedTask.value})
-  }
-}
-function startDrag(event: DragEvent, taskId: number) {
-  const dataTransfer = event.dataTransfer
-  if (dataTransfer) {
-    dataTransfer.dropEffect = "move"
-    dataTransfer.effectAllowed = 'move'
-    dataTransfer.setData('taskId', taskId.toString())
-  }
-}
-function onDrop(event: DragEvent, columnId: number | null) {
-  const dataTransfer = event.dataTransfer
-  if (dataTransfer) {
-    const taskId = dataTransfer.getData('taskId')
-    getDraggingTask(+taskId)
-    handleDrop(columnId)
-  }
-}
+onMounted(() => {
+  console.log('Column added',props.column.id)
+})
 </script>
 
 <style lang="sass" scoped>
@@ -208,4 +180,3 @@ hr
   height: 1px
   background-color: #b7b6b6
 </style>
-

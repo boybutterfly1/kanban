@@ -19,28 +19,27 @@
     <hr>
       <div class="board__container">
         <column-comp
-            v-for="column in board.columns"
-            :key="column.id"
-            :column="column"
-            :board="props.board"
-
+          v-for="column in board.columns"
+          :key="column.id"
+          :column="column"
+          :board="props.board"
         />
           <img
-              class="btn"
-              src="https://img.icons8.com/ios/50/000000/plus--v1.png"
-              alt="plus--v1"
-              @click="newColumnPopupIsOpen = true"
+            class="btn"
+            src="https://img.icons8.com/ios/50/000000/plus--v1.png"
+            alt="plus--v1"
+            @click="popupsFlagsStore.newColumnPopupIsOpen = true"
           />
       </div>
   </div>
   <my-popup
-      :is-open="newColumnPopupIsOpen"
+      :is-open="popupsFlagsStore.newColumnPopupIsOpen"
       @close="newColumnPopupClose"
   >
     <form @submit.prevent class="new-column">
       <my-select
           v-model="selectedStatus"
-          :array="kanbanStore.statuses"
+          :array="props.board.availableStatuses"
           @change="addStatus(selectedStatus)"
           select-name="Column statuses"
       />
@@ -55,7 +54,7 @@
       <my-input
           v-model="newColumn.name"
           type="text"
-          placeholder="Column Name"
+          placeholder="Column name"
       />
       <my-button
         @click="addNewColumn"
@@ -68,14 +67,15 @@
 
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
-import {Board, Column, Task} from "@/types/types";
-import {computed, ref} from "vue";
+import {Board, Column} from "@/types/types";
+import {ref} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MySelect from "@/components/UI/MySelect.vue";
 import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
-import {prop} from "vue-class-component";
+import {usePopupsFlagsStore} from "@/store/popupsFlags";
+const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   board: Board
@@ -87,36 +87,34 @@ const newColumn = ref<Column>({
   tasksList: []
 })
 
-const newColumnPopupIsOpen = ref<boolean>(false)
 const selectedStatus = ref<string>('')
-const searchValue = ref<string>()
+const searchValue = ref<string>('')
 
-function newColumnPopupClose() {
-  newColumn.value.statuses = []
-  newColumn.value.name = ''
-  newColumnPopupIsOpen.value = false
-}
-function addStatus(selectedStatus:string) {
-  if (newColumn.value.statuses.find(status => status === selectedStatus)){
-    newColumn.value.statuses = newColumn.value.statuses.filter(status => status !== selectedStatus)
-  } else {
-    newColumn.value.statuses.push(selectedStatus)
-  }
+function addStatus(newStatus:string) {
+  newColumn.value.statuses.push(newStatus)
+  newColumn.value.name = newColumn.value.statuses.join(', ')
+  selectedStatus.value = ''
 }
 function deleteStatus(selectedStatus:string) {
   if (newColumn.value.statuses.find(status => status === selectedStatus)){
     newColumn.value.statuses = newColumn.value.statuses.filter(status => status !== selectedStatus)
+    newColumn.value.name = newColumn.value.statuses.join(', ')
   }
 }
 function addNewColumn() {
   if (newColumn.value.name && newColumn.value.statuses.length > 0) {
     newColumn.value.id = Date.now()
     props.board.columns.push({...newColumn.value})
-    newColumn.value.tasksList = []
+    props.board.availableStatuses = props.board.availableStatuses.filter((status: string) => !newColumn.value.statuses.includes(status))
     newColumnPopupClose()
   }
 }
-
+function newColumnPopupClose() {
+  newColumn.value.tasksList = []
+  newColumn.value.statuses = []
+  newColumn.value.name = ''
+  popupsFlagsStore.newColumnPopupIsOpen = false
+}
 </script>
 
 <style lang="sass" scoped>
@@ -171,4 +169,3 @@ hr
   height: 1px
   background-color: #b7b6b6
 </style>
-@drop="handleDrop(column.id)"

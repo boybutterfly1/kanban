@@ -9,7 +9,6 @@
 <script setup lang="ts">
 import BoardComp from "@/components/BoardComp.vue";
 import {useKanbanStore} from "@/store/kanban";
-import {Board} from "@/types/types";
 import {ref} from "vue";
 import {useRoute} from "vue-router";
 

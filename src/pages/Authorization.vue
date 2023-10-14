@@ -98,7 +98,6 @@ function login(currentUser: User) {
     usersStore.currentUser = user;
     usersStore.isLoggedIn = true;
     router.push('/')
-    console.log(usersStore.currentUser.username)
   }
 }
 function register(currentUser: User) {
