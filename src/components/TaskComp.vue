@@ -5,7 +5,8 @@
        @click="taskDetailsIsOpen = !taskDetailsIsOpen"
        :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':dragAndDropStore.isGrabbed}"
        draggable="true"
-       @dragstart="dragAndDropStore.onDrag($event, task)"
+       @dragstart="dragAndDropStore.onDrag($event, task); $emit('dragStart')"
+       @dragend="dragAndDropStore.isDroppableArea = false"
   >
     <div class="task__header">
       <div class="popup">
@@ -35,13 +36,13 @@
 <script setup lang="ts">
 import {Task} from "@/types/types";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
-import {computed, ref} from "vue";
+import {ref} from "vue";
 const taskDetailsIsOpen = ref<boolean>(false)
 const dragAndDropStore = useTaskDragAndDropStore()
 const props = defineProps<{
   task: Task
 }>()
-
+const emits = defineEmits(['dragEnd','dragStart'])
 function getStatusClass(status: string): string {
     return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
@@ -58,7 +59,7 @@ function getStatusClass(status: string): string {
   justify-content: space-between
   box-shadow: 5px 5px 10px rgba(0,0,0,0.1)
   transition: 0.3s ease
-  padding: 15px 15px
+  padding: 15px
   cursor: grab
   &__isGrabbed
     cursor: grabbing
