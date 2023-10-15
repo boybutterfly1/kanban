@@ -89,7 +89,7 @@ function changeInputs() {
   user.value.login = ''
   user.value.password = ''
 }
-const isPasswordValid = ref<boolean | null>(null)
+const isPasswordValid = ref<boolean>(false)
 const passwordError = ref<string>('')
 function validatePassword() {
   if (user.value.password && user.value.password.length < 8 || user.value.password && !/^[A-Za-z0-9.,!?;:]+$/.test(user.value.password)) {
