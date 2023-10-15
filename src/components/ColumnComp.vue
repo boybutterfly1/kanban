@@ -26,7 +26,7 @@
         :key="task.id"
         :task="task"
     />
-    <div v-if="dropAreaState">
+    <div v-if="dropAreaFlag">
         <div
           :class="{ 'column__drop-area' : dragAndDropStore.isDroppableArea, 'column__drop-area__dragover': isDragOver}"
           v-for="status in column.statuses"
@@ -118,10 +118,15 @@ const newTask = ref<Task>({
 const newTaskPopupIsOpen = ref<boolean>(false)
 const isDragOver = ref(false)
 // const isDroppableArea = ref(false)
-const dropAreaState = computed<boolean>(() => {
-  return dragAndDropStore.dragTask !== null ? props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea && dragAndDropStore.dragTask.columnId !== props.column.id && props.column.statuses.length > 1: false
+const dropAreaFlag = computed<boolean>(() => {
+  return  isColumnNotOpen.value && dragAndDropStore.isDroppableArea && isDragColNotDropCol.value && props.column.statuses.length > 1
 })
-
+const isColumnNotOpen = computed<boolean>(() => {
+  return !props.column.statuses.some(status => status === 'Open')
+})
+const isDragColNotDropCol = computed<boolean>(() => {
+  return dragAndDropStore.dragTask ? dragAndDropStore.dragTask.columnId !== props.column.id : false
+})
 const searchTasks = computed<Task[]>(() => {
   return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
 })
