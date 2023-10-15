@@ -1,9 +1,11 @@
 <template>
   <div
+      v-if="column"
       class="column"
       @dragover.prevent
       @dragenter.prevent
-      @drop="onDrop($event, column? column.id: null)"
+      @drop="dragAndDropStore.onDrop(column, board)"
+
   >
     <div class="column__header">
       <div class="column__header__name">
@@ -21,15 +23,23 @@
     </div>
     <hr>
     <task-comp
-      v-for="task in searchTasks"
-      :key="task.id"
-      :task="task"
+        v-for="task in searchTasks"
+        :key="task.id"
+        :task="task"
     />
-    <button
-        @click="newTaskPopupIsOpen = true;
-      console.log('Add task id', column.id, 'Add task statuses', column.statuses)"
+    <div
+        :class="{ 'column__drop-area' : dragAndDropStore.isDroppableArea}"
+        v-for="status in column.statuses"
+        v-if="dropAreaState2"
     >
-      <img width="17" src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
+      <span v-if="column.statuses.length > 1">{{status}}</span>
+    </div>
+    <button
+        v-if="column.id === board.columns[0].id"
+        class="column__add-task-btn"
+        @click="newTaskPopupIsOpen = true"
+    >
+      <img src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
       <span>Add task</span>
     </button>
   </div>
@@ -52,8 +62,6 @@
           :array="column.statuses"
           v-model="newTask.status"
           select-name="Task status"
-          @change="
-          console.log('change id', column.id, 'change statuses', column.statuses)"
       />
       <my-input
           v-else
@@ -94,19 +102,25 @@ const kanbanStore = useKanbanStore()
 const props = defineProps<{
   column: Column
   board: Board
-
 }>()
 const newTask = ref<Task>({
-  id: 0,
+  id: null,
   name: '',
   description: '',
   status: '',
   startDate: '',
   priority: '',
   author: usersStore.currentUser? usersStore.currentUser.username : null,
-  columnId: null
+  columnId: props.column.id
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
+
+const dropAreaState1 = computed<boolean>(() => {
+  return props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea
+})
+const dropAreaState2 = computed<boolean>(() => {
+  return dragAndDropStore.dragTask !== null ? props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea && dragAndDropStore.dragTask.columnId !== props.column.id: false
+})
 
 const searchTasks = computed<Task[]>(() => {
   return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
@@ -122,7 +136,6 @@ function addNewTask() {
   if (newTask.value.name && newTask.value.status && newTask.value.priority) {
     newTask.value.id = Date.now()
     newTask.value.startDate = new Date().toLocaleString()
-    newTask.value.columnId = props.column.id
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
   }
@@ -134,10 +147,6 @@ function addNewTask() {
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
   }
-}
-function onDrop(event: DragEvent, dropColumnId: number | null) {
-  dropColumnId? dragAndDropStore.onDrop(event, dropColumnId) : null
-  dragAndDropStore.board = props.board
 }
 onUnmounted(() => {
   kanbanStore.searchValue = ''
@@ -168,16 +177,30 @@ onUnmounted(() => {
         border-radius: 5px
         &:hover
           background-color: #a7adb2
-  & button
-    padding: 5px 10px
+  &__drop-area
+    display: flex
+    justify-content: center
+    align-items: center
+    height: 100px
+    background-color: #c6d9ea
+    border-radius: 15px
+    & span
+      color: #628be1
+      font-size: 12px
+  &__add-task-btn
+    padding: 5px 5px
     display: flex
     background-color: rgba(0, 0, 0, 0)
     width: 90px
     border: 0
     cursor: pointer
+    align-items: center
     &:hover
       border-radius: 6px
       background-color: #a7adb2
+    & img
+      width: 17px
+      margin-right: 2px
 .new-task
   display: flex
   flex-direction: column

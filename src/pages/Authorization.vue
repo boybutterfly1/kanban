@@ -1,6 +1,10 @@
 <template>
-  <div class="auth">
+  <div
+      class="auth"
+      v-if="!kanbanStore.loading"
+  >
       <form
+        @submit.prevent
         v-if="isRegistered"
       >
         <my-input
@@ -23,6 +27,7 @@
         <span @click="changeInputs">Registration</span>
       </form>
       <form
+        @submit.prevent
         v-else
       >
         <my-input
@@ -55,6 +60,7 @@
         <span @click="changeInputs">Login</span>
       </form>
   </div>
+  <loading v-else/>
 </template>
 
 <script setup lang="ts">
@@ -64,7 +70,9 @@ import {useUsersStore} from "@/store/users";
 import router from "@/router";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyButton from "@/components/UI/MyButton.vue";
-
+import Loading from "@/components/UI/Loading.vue";
+import {useKanbanStore} from "@/store/kanban";
+const kanbanStore = useKanbanStore()
 const usersStore = useUsersStore()
 const isRegistered = ref<boolean>(true)
 const user = ref<User>({
@@ -97,21 +105,26 @@ function login(currentUser: User) {
   if (user) {
     usersStore.currentUser = user;
     usersStore.isLoggedIn = true;
-    router.push('/')
+    kanbanStore.loading = true
+    setTimeout(() => {
+      router.push('/');
+      kanbanStore.loading = false
+    }, 800);
   }
 }
+
 function register(currentUser: User) {
   usersStore.users.push(currentUser)
   usersStore.currentUser = currentUser;
   usersStore.isLoggedIn = true;
-  router.push('/')
+  kanbanStore.changePage('/')
 }
 </script>
 
 <style lang="sass" scoped>
 .auth
   position: absolute
-  top: 40%
+  top: 45%
   left: 50%
   transform: translate(-50%, -50%)
   border-radius: 8px

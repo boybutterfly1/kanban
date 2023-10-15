@@ -44,12 +44,13 @@
         select-name="Column statuses"
       />
       <div class="new-column__statuses">
-        <button
+        <div class="new-column__statuses__status"
           v-for="status in newColumn.statuses"
           @click="deleteStatus(status)"
         >
           {{status}}
-        </button>
+          <img src="https://img.icons8.com/ios-filled/50/multiply.png" alt="delete status"/>
+        </div>
       </div>
       <my-input
         v-model="newColumn.name"
@@ -77,7 +78,6 @@ import MySelect from "@/components/UI/MySelect.vue";
 import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
-
 const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
@@ -87,7 +87,8 @@ const newColumn = ref<Column>({
   id: null,
   name: '',
   statuses : [],
-  tasksList: []
+  tasksList: [],
+  boardId: props.board.id
 })
 
 const selectedStatus = ref<string>('')
@@ -155,7 +156,8 @@ function newColumnPopupClose() {
     flex-wrap: wrap
     justify-content: flex-start
     margin-bottom: 10px
-    & button
+    &__status
+      align-items: center
       padding: 2px 5px
       font-size: 12px
       border-radius: 5px
@@ -165,6 +167,10 @@ function newColumnPopupClose() {
       cursor: pointer
       &:hover
         background-color: #a7adb2
+      & img
+        width: 15px
+        height: 15px
+        vertical-align: -3.5px
 hr
   margin-bottom: 30px
   border: 0

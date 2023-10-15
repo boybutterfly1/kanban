@@ -1,9 +1,11 @@
 <template>
-  <div class="task"
+  <div
+       v-if="task"
+       class="task"
        @click="taskDetailsIsOpen = !taskDetailsIsOpen"
-       :class="{ 'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen}"
+       :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':dragAndDropStore.isGrabbed}"
        draggable="true"
-       @dragstart="onDrag($event, task? task.id: null)"
+       @dragstart="dragAndDropStore.onDrag($event, task)"
   >
     <div class="task__header">
       <div class="popup">
@@ -43,9 +45,6 @@ const props = defineProps<{
 function getStatusClass(status: string): string {
     return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
-function onDrag(event: DragEvent, dragTaskId: number | null) {
-  dragTaskId? dragAndDropStore.onDrag(event, dragTaskId) : null
-}
 </script>
 
 <style lang="sass" scoped>
@@ -61,6 +60,8 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
   transition: 0.3s ease
   padding: 15px 15px
   cursor: grab
+  &__isGrabbed
+    cursor: grabbing
   &__header
     display: flex
     align-items: center
@@ -126,5 +127,4 @@ function onDrag(event: DragEvent, dragTaskId: number | null) {
   overflow-y: auto
 .menu-open
   right: 0
-
 </style>

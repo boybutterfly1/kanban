@@ -1,5 +1,6 @@
 <template>
-  <div class="boards">
+  <div class="boards"
+  v-if="!kanbanStore.loading">
     <div class="boards__header">
       <div class="boards__header__name">
         <span>Boards</span>
@@ -35,7 +36,7 @@
           <tr
               class="list"
               v-for="board in searchBoards"
-              @click="router.push(`/board${board.id}`)"
+              @click="kanbanStore.changePage(`/board${board.id}`)"
           >
             <td>{{board.name}}</td>
             <td>{{board.id}}</td>
@@ -49,6 +50,7 @@
       </table>
     </div>
   </div>
+  <loading v-else/>
   <my-popup
       :is-open="popupFlagsStore.createBoardPopupIsOpen"
       @close="createBoardPopupClose"
@@ -80,6 +82,7 @@ import {Board, Task} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
+import Loading from "@/components/UI/Loading.vue";
 const popupFlagsStore = usePopupsFlagsStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
@@ -98,7 +101,7 @@ function createBoard() {
     newBoard.value.id = Date.now()
     kanbanStore.boards.push({...newBoard.value})
     popupFlagsStore.createBoardPopupIsOpen = false
-    router.push(`/board${newBoard.value.id}`)
+    kanbanStore.changePage(`/board${newBoard.value.id}`)
     createBoardPopupClose()
   }
 }

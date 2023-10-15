@@ -1,38 +1,32 @@
 import {defineStore} from 'pinia'
 import {ref} from "vue";
 import {Board, Column, Task} from "@/types/types";
-
 export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
   const dragTask = ref<Task | null>(null)
   const board = ref<Board | null>(null)
-  function onDrag(event: DragEvent, dragTaskId: number) {
+  const isGrabbed = ref<boolean>(false)
+  const isDroppableArea = ref<boolean>(false)
+  function onDrag(event: DragEvent, task: Task) {
+    dragTask.value = task
+    console.log(dragTask.value)
+    isGrabbed.value = true
+    isDroppableArea.value = true
     const dataTransfer = event.dataTransfer
     if (dataTransfer) {
       dataTransfer.dropEffect = "move"
       dataTransfer.effectAllowed = 'move'
-      dataTransfer.setData('dragTaskId', dragTaskId.toString())
     }
   }
-  function onDrop(event: DragEvent, dropColumnId: number) {
-    const dataTransfer = event.dataTransfer
-    if (dataTransfer) {
-      const draggedTaskId: number = +(dataTransfer.getData('dragTaskId'))
-      getDraggedTask(draggedTaskId)
-      dragTask.value ? deleteTaskFromDragColumn(dragTask.value.columnId) : null
-      addTaskToDropColumn(dropColumnId)
+  function onDrop(column: Column, dropBoard: Board) {
+    board.value = dropBoard
+    if (dragTask.value) {
+      deleteTaskFromDragColumn(dragTask.value.columnId)
+      addTaskToDropColumn(column)
     }
+    isGrabbed.value = false
+    isDroppableArea.value = false
   }
-  function getDraggedTask(draggedTaskId: number) {
-    board.value ? board.value.columns.forEach((column: Column) => {
-      let foundTask = column.tasksList.find((task: Task) => task.id === draggedTaskId)
-      if (foundTask) {
-        dragTask.value = foundTask
-      }
-    }) : null
-  }
-  function addTaskToDropColumn(dropColumnId: number) {
-    let dropColumn = null
-    dropColumn = board.value?.columns.find((column: Column) => column.id === dropColumnId)
+  function addTaskToDropColumn(dropColumn: Column) {
     if (dropColumn && dragTask.value) {
       dragTask.value.columnId = dropColumn.id
       dragTask.value.status = dropColumn.statuses[0]
@@ -52,6 +46,8 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
   return {
     dragTask,
     board,
+    isGrabbed,
+    isDroppableArea,
     onDrag,
     onDrop
   }

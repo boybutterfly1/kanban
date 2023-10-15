@@ -10,12 +10,23 @@ export const useKanbanStore = defineStore('kanban', () => {
   const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Closed']
   const boards = ref<Board[]>([])
   const searchValue = ref<string>('')
+  const loading = ref<boolean>(false)
+
   const searchTasks = computed<Task[]>((array: Task[]) => {
     return array.filter((task: Task) => task.name.toLowerCase().includes(searchValue.value.toLowerCase()))
   })
   const searchBoards = computed<Board[]>((array: Board[]) => {
     return array.filter((board: Board) => board.name.toLowerCase().includes(searchValue.value.toLowerCase()))
   })
+
+  function changePage(route: string) {
+    loading.value = true
+    setTimeout(() => {
+      router.push(route);
+      loading.value = false
+    }, 1000);
+  }
+
   // const search = computed<Task[] | Board[]>((array: Task[] | Board[]) => {
   //   return array.filter((item: Task | Board) => item.name.toLowerCase().includes(searchValue.value.toLowerCase()))
   // })
@@ -38,6 +49,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     searchValue,
     searchTasks,
     searchBoards,
+    loading,
+    changePage
     // createBoard,
     // addNewColumn
   }

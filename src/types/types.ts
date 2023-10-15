@@ -10,6 +10,7 @@ export interface Column {
   name: string
   statuses : string[]
   tasksList: Task[]
+  boardId: number | null
 }
 export interface Task {
   id: number | null
