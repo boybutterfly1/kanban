@@ -5,10 +5,9 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
   const dragTask = ref<Task | null>(null)
   const board = ref<Board | null>(null)
   const isGrabbed = ref<boolean>(false)
-  const isDroppableArea = ref<boolean>(false)
+  const isDroppableArea = ref<boolean>(true)
   function onDrag(event: DragEvent, task: Task) {
     dragTask.value = task
-    console.log(dragTask.value)
     isGrabbed.value = true
     isDroppableArea.value = true
     const dataTransfer = event.dataTransfer

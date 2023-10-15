@@ -5,7 +5,6 @@
       @dragover.prevent
       @dragenter.prevent
       @drop="dragAndDropStore.onDrop(column, board)"
-
   >
     <div class="column__header">
       <div class="column__header__name">
@@ -27,12 +26,15 @@
         :key="task.id"
         :task="task"
     />
-    <div
-        :class="{ 'column__drop-area' : dragAndDropStore.isDroppableArea}"
-        v-for="status in column.statuses"
-        v-if="dropAreaState2"
-    >
-      <span v-if="column.statuses.length > 1">{{status}}</span>
+    <div v-if="dropAreaState">
+        <div
+          :class="{ 'column__drop-area' : dragAndDropStore.isDroppableArea, 'column__drop-area__dragover': isDragOver}"
+          v-for="status in column.statuses"
+          @dragover="isDragOver = true"
+          @dragleave="isDragOver = false"
+        >
+          <span>{{status}}</span>
+        </div>
     </div>
     <button
         v-if="column.id === board.columns[0].id"
@@ -114,12 +116,10 @@ const newTask = ref<Task>({
   columnId: props.column.id
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
-
-const dropAreaState1 = computed<boolean>(() => {
-  return props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea
-})
-const dropAreaState2 = computed<boolean>(() => {
-  return dragAndDropStore.dragTask !== null ? props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea && dragAndDropStore.dragTask.columnId !== props.column.id: false
+const isDragOver = ref(false)
+// const isDroppableArea = ref(false)
+const dropAreaState = computed<boolean>(() => {
+  return dragAndDropStore.dragTask !== null ? props.column.id !== props.board.columns[0].id && dragAndDropStore.isDroppableArea && dragAndDropStore.dragTask.columnId !== props.column.id && props.column.statuses.length > 1: false
 })
 
 const searchTasks = computed<Task[]>(() => {
@@ -184,6 +184,9 @@ onUnmounted(() => {
     height: 100px
     background-color: #c6d9ea
     border-radius: 15px
+    margin-bottom: 10px
+    &__dragover
+      background-color: #b2cbe1
     & span
       color: #628be1
       font-size: 12px
