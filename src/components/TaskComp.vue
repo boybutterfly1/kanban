@@ -101,6 +101,9 @@ function getStatusClass(status: string): string {
     & .closed
       padding: 1px 5px
       background-color: #b3ec70
+    & .testing
+      padding: 1px 5px
+      background-color: #9e9ed2
 .popup
   position: relative
   &__content
