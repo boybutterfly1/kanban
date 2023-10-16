@@ -54,7 +54,7 @@ export const useKanbanStore = defineStore('kanban', () => {
           },],
           boardId: 1
         }],
-      availableStatuses: ['Open', 'In Progress', 'Need Info', 'Closed']
+      availableStatuses: ['Closed']
     },
   ])
   const searchValue = ref<string>('')
