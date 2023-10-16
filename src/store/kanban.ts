@@ -8,7 +8,55 @@ export const useKanbanStore = defineStore('kanban', () => {
   const popupFlagsStore= usePopupsFlagsStore()
   const priorities: string[] = ['Trivial', 'Minor', 'Normal', 'Critical', 'Blocker']
   const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Closed']
-  const boards = ref<Board[]>([])
+  const boards = ref<Board[]>([
+    {
+      id: 1,
+      name: 'Test Kanban',
+      owner: 'Admin',
+      columns: [{
+        id: 1,
+        name: 'Open',
+        statuses: ['Open'],
+        tasksList: [{
+          id: 1,
+          name: '1',
+          description: null,
+          status: 'Open',
+          startDate: '00.00.00',
+          priority: 'Minor',
+          author: 'Admin',
+          columnId: 1
+        },{
+          id: 2,
+          name: '2',
+          description: null,
+          status: 'Open',
+          startDate: '00.00.00',
+          priority: 'Minor',
+          author: 'Admin',
+          columnId: 1
+        }],
+        boardId: 1
+      },
+        {
+          id: 2,
+          name: 'In Progress, Need Info',
+          statuses: ['In Progress', 'Need Info'],
+          tasksList: [{
+            id: 3,
+            name: '3',
+            description: null,
+            status: 'In Progress',
+            startDate: '00.00.00',
+            priority: 'Minor',
+            author: 'Admin',
+            columnId: 2
+          },],
+          boardId: 1
+        }],
+      availableStatuses: ['Open', 'In Progress', 'Need Info', 'Closed']
+    },
+  ])
   const searchValue = ref<string>('')
   const loading = ref<boolean>(false)
 
@@ -27,21 +75,6 @@ export const useKanbanStore = defineStore('kanban', () => {
     }, 1000);
   }
 
-  // const search = computed<Task[] | Board[]>((array: Task[] | Board[]) => {
-  //   return array.filter((item: Task | Board) => item.name.toLowerCase().includes(searchValue.value.toLowerCase()))
-  // })
-
-  // function createBoard(newBoard: Board) {
-  //   newBoard.id = Date.now()
-  //   boards.value.push({...newBoard})
-  //   popupFlagsStore.createBoardPopupIsOpen = false
-  //   router.push(`/board${newBoard.id}`)
-  // }
-  // function addNewColumn(newColumn: Column, board: Board) {
-  //   newColumn.id = Date.now()
-  //   board.columns.push({...newColumn})
-  // }
-
   return {
     boards,
     priorities,
@@ -51,7 +84,5 @@ export const useKanbanStore = defineStore('kanban', () => {
     searchBoards,
     loading,
     changePage
-    // createBoard,
-    // addNewColumn
   }
 })

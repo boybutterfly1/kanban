@@ -26,15 +26,18 @@
         :key="task.id"
         :task="task"
     />
-    <div v-if="dropAreaFlag">
+    <div v-if="isDropArea">
+      <div v-for="status in column.statuses">
         <div
-          :class="{ 'column__drop-area' : dragAndDropStore.isDroppableArea, 'column__drop-area__dragover': isDragOver}"
-          v-for="status in column.statuses"
-          @dragover="isDragOver = true"
-          @dragleave="isDragOver = false"
+            class="column__drop-area"
+            :class="{ 'column__drop-area__dragover': isDragOver[status] }"
+            @dragover="setDragOver(status,true)"
+            @dragleave="setDragOver(status, false)"
+            @drop="dragAndDropStore.onDrop(column, board, status); setDragOver(status, false)"
         >
-          <span>{{status}}</span>
+          <span>{{ status }}</span>
         </div>
+      </div>
     </div>
     <button
         v-if="column.id === board.columns[0].id"
@@ -116,13 +119,16 @@ const newTask = ref<Task>({
   columnId: props.column.id
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
-const isDragOver = ref(false)
+const isDragOver = ref<Record<string, boolean>>({})
+const setDragOver = (status: string, value: boolean) => {
+  isDragOver.value[status] = value;
+};
 // const isDroppableArea = ref(false)
-const dropAreaFlag = computed<boolean>(() => {
+const isDropArea = computed<boolean>(() => {
   return  isColumnNotOpen.value && dragAndDropStore.isDroppableArea && isDragColNotDropCol.value && props.column.statuses.length > 1
 })
 const isColumnNotOpen = computed<boolean>(() => {
-  return !props.column.statuses.some(status => status === 'Open')
+  return !props.column.statuses.some((status: string) => status === 'Open')
 })
 const isDragColNotDropCol = computed<boolean>(() => {
   return dragAndDropStore.dragTask ? dragAndDropStore.dragTask.columnId !== props.column.id : false
@@ -186,12 +192,12 @@ onUnmounted(() => {
     display: flex
     justify-content: center
     align-items: center
-    height: 100px
-    background-color: #c6d9ea
+    height: 50px
+    background-color: #d2e2f1
     border-radius: 15px
     margin-bottom: 10px
     &__dragover
-      background-color: #b2cbe1
+      background-color: #becdec
     & span
       color: #628be1
       font-size: 12px

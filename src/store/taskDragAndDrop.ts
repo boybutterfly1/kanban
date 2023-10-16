@@ -16,9 +16,12 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
       dataTransfer.effectAllowed = 'move'
     }
   }
-  function onDrop(column: Column, dropBoard: Board) {
+  function onDrop(column: Column, dropBoard: Board, status?: string) {
     board.value = dropBoard
     if (dragTask.value) {
+      if (status) {
+        dragTask.value.status = status
+      }
       deleteTaskFromDragColumn(dragTask.value.columnId)
       addTaskToDropColumn(column)
     }
@@ -28,7 +31,9 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
   function addTaskToDropColumn(dropColumn: Column) {
     if (dropColumn && dragTask.value) {
       dragTask.value.columnId = dropColumn.id
-      dragTask.value.status = dropColumn.statuses[0]
+      if (dropColumn.statuses.length === 1) {
+        dragTask.value.status = dropColumn.statuses[0]
+      }
       dragTask.value.statusChangeDate = Date.now().toLocaleString()
       dropColumn.tasksList.push({...dragTask.value})
     }

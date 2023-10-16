@@ -5,7 +5,7 @@
        @click="taskDetailsIsOpen = !taskDetailsIsOpen"
        :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':dragAndDropStore.isGrabbed}"
        draggable="true"
-       @dragstart="dragAndDropStore.onDrag($event, task); $emit('dragStart')"
+       @dragstart="dragAndDropStore.onDrag($event, task)"
        @dragend="dragAndDropStore.isDroppableArea = false"
   >
     <div class="task__header">
