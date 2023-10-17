@@ -18,9 +18,12 @@ input
   border-radius: 5px
   border: 1px solid #d9d9d9
   padding: 2px 5px
+  color: #484747
+  &::placeholder
+    color: #484747
   &:focus
     outline: none
-    box-shadow: 0 0 5px #3f74e3
+    box-shadow: 0 0 5px 1.5px #295bc4
 </style>
 
 

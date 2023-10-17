@@ -21,7 +21,7 @@ export interface Task {
   startDate: string
   deadlineDate?: string
   priority: keyof typeof Priorities
-  author: string | null
+  author: string
   columnId: number | null
 }
 export interface User {

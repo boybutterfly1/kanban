@@ -77,7 +77,7 @@ select
   font-family: 'Open Sans', sans-serif
   border-radius: 5px
   border: 1px solid #d9d9d9
-  color: #757575
+  color: #484747
   &:focus
     outline: none
 </style>

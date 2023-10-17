@@ -22,7 +22,7 @@
         <div>
           <button
               @click="isShowFilters = !isShowFilters"
-              :class="{'active' : isShowFilters}"
+              :class="{'active' : isShowFilters, 'filters-selected' : selectedFilterOption}"
           >
             <img src="https://img.icons8.com/material-outlined/24/484747/filter--v1.png" alt="filter"/>
             Filters
@@ -37,30 +37,51 @@
     >
       <div class="filters-container">
         <div class="filter"
-             v-for="filter in tasksFiltersArray"
-             :key="filter"
+             v-for="filter in filtersArray"
+             :key="Object.keys(filter)[0]"
              @click="openFilterPopup(filter)"
         >
-          {{filter}}
-          <span v-if="selectedFilter === filter">: {{selectedFilterOption}}</span>
+          {{Object.keys(filter)[0]}}
+          <span v-if="Object.values(filter)[0].length > 0">{{': ' + Object.values(filter)[0].join(', ')}}</span>
         </div>
         <my-popup
             :is-open="isFilterPopupOpen"
-            @close="isFilterPopupOpen = false"
+            @close="closeFilterPopup"
         >
-          Select
-          <my-select
-            v-model="selectedFilterOption"
-            :array="filterOptionsArray(selectedFilter)"
-            :select-name="selectedFilter"
-          />
+          <form
+            @submit.prevent
+            class="filterOptionsPopup"
+          >
+            <my-select
+              v-model="selectedFilterOption"
+              :array="filterOptionsArray(Object.keys(selectedFilter)[0])"
+              :select-name="'Select ' + Object.keys(selectedFilter)[0]"
+              @change="addToSelectedFilterOptionsArray"
+            />
+
+            <div class="filterOptionsPopup__options">
+              <div
+                  class="filterOptionsPopup__options__option"
+                  v-for="option in selectedFilterOptionsArray"
+                   @click="deleteOption(option)"
+              >
+                {{option}}
+                <img src="https://img.icons8.com/ios-filled/50/multiply.png" alt="delete option"/>
+              </div>
+            </div>
+            <my-button
+                @click="applyFilterPopup"
+            >
+              Apply
+            </my-button>
+          </form>
         </my-popup>
       </div>
       <hr>
     </div>
       <div class="board__container">
         <column-comp
-          v-for="column in filterResult"
+          v-for="column in board.columns"
           :key="column.id"
           :column="column"
           :board="board"
@@ -135,28 +156,35 @@ const newColumn = ref<Column>({
   tasksList: [],
   boardId: props.board.id
 })
-
-const selectedFilterOption = ref('')
-const selectedFilter = ref('')
 const isFilterPopupOpen = ref(false)
 const isShowFilters = ref(false)
+
 const tasksSortValuesArray = ref(['Default', 'Priority', 'Deadline', 'Start Date'])
-const tasksFiltersArray = ref(['Status', 'Priority', 'Author'])
 const tasksSortValue = ref('')
 const selectedStatus = ref('')
+const filtersArray = ref<{ [key: string]: string[] }[]>([
+  { Status: [] },
+  { Priority: [] },
+  { Author: [] },
+]);
+const selectedFilterOption = ref('')
+const selectedFilter = ref<{ [key: string]: string[] }>({})
+const selectedFilterOptionsArray = ref<string[]>([])
 
 const filterResult = computed<Column[]>(() => {
-  if (selectedFilterOption.value) {
-    return props.board.columns.map((column: Column) => {
-      const filteredTasks = column.tasksList.filter((task: Task) => {
-        if (selectedFilter.value === 'Status') return task.status === selectedFilterOption.value
-        if (selectedFilter.value === 'Priority') return task.priority === selectedFilterOption.value
-        if (selectedFilter.value === 'Author') return task.author === selectedFilterOption.value
-      });
-      return { ...column, tasksList: filteredTasks }
+  const statusConditions = filtersArray.value[0]['Status']
+  const priorityConditions = filtersArray.value[1]['Priority']
+  const authorConditions = filtersArray.value[2]['Author']
+
+  return props.board.columns.map((column: Column) => {
+    const filteredTasks = column.tasksList.filter((task) => {
+      const statusMatch = statusConditions.length === 0 || statusConditions.includes(task.status)
+      const priorityMatch = priorityConditions.length === 0 || priorityConditions.includes(task.priority)
+      const authorMatch = authorConditions.length === 0 || authorConditions.includes(task.author)
+      return statusMatch && priorityMatch && authorMatch
     });
-  }
-  return props.board.columns;
+    return { ...column, tasksList: filteredTasks }
+  });
 });
 
 function filterOptionsArray(filter: string):string[] {
@@ -167,9 +195,35 @@ function filterOptionsArray(filter: string):string[] {
   }
   return filters[filter]
 }
-function openFilterPopup(filter: string) {
+function addToSelectedFilterOptionsArray() {
+  if (!selectedFilterOptionsArray.value.some(options => options === selectedFilterOption.value)) {
+    selectedFilterOptionsArray.value.push(selectedFilterOption.value)
+  }
+}
+function applyFilterPopup() {
+  const key = Object.keys(selectedFilter.value)[0]
+  selectedFilter.value[key] = [...selectedFilterOptionsArray.value]
+  selectedFilterOptionsArray.value = []
+  selectedFilterOption.value = ''
+  isFilterPopupOpen.value = false
+}
+function closeFilterPopup() {
+  selectedFilterOptionsArray.value = []
+  isFilterPopupOpen.value = false
+  selectedFilterOption.value = ''
+
+}
+function openFilterPopup(filter: object) {
   isFilterPopupOpen.value = true
   selectedFilter.value = filter
+  if (Object.values(filter)[0].length > 0){
+    selectedFilterOptionsArray.value = Object.values(filter)[0]
+  }
+}
+function deleteOption(selectedOption:string) {
+  selectedFilterOptionsArray.value = selectedFilterOptionsArray.value.filter((option: string) => {
+    return option !== selectedOption
+  })
 }
 function addStatus(newStatus:string) {
   newColumn.value.statuses.push(newStatus)
@@ -234,6 +288,10 @@ function newColumnPopupClose() {
           margin-right: 2px
         &.active
           background-color: #a4baec
+        &.filters-selected
+          background-color: #c4d3f5
+          &:hover
+            background-color: #a4baec
       &__filters
         display: flex
         margin-bottom: 10px
@@ -257,6 +315,29 @@ function newColumnPopupClose() {
             & img
               width: 15px
               height: 15px
+          & .filterOptionsPopup
+            display: flex
+            flex-direction: column
+            width: 180px
+            &__options
+              display: flex
+              flex-wrap: wrap
+              justify-content: flex-start
+              &__option
+                align-items: center
+                padding: 3px 5px
+                font-size: 13px
+                border-radius: 5px
+                margin: 0 5px 3px 0
+                border: none
+                background-color: #cbd3da
+                cursor: pointer
+                &:hover
+                  background-color: #a7adb2
+                & img
+                  width: 15px
+                  height: 15px
+                  vertical-align: -3.5px
   &__container
     display: flex
     overflow-x: auto

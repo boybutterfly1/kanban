@@ -93,19 +93,24 @@ function getStatusClass(status: string): string {
     cursor: pointer
     & .open
       padding: 1px 5px
-      background-color: #c0c9d0
+      background-color: #c5cdd3
+      color: #282b2d
     & .in-progress
       padding: 1px 5px 2px
-      background-color: #79b7ea
+      background-color: #a4baec
+      color: #111f3d
     & .need-info
       padding: 1px 5px
-      background-color: #f5de6a
+      background-color: #f3e49a
+      color: #594424
     & .closed
       padding: 1px 5px
-      background-color: #b3ec70
+      background-color: #cbeca4
+      color: #33481c
     & .testing
       padding: 1px 5px
-      background-color: #9e9ed2
+      background-color: #b7b7d5
+      color: #241e41
 .popup
   position: relative
   &__content

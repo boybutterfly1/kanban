@@ -52,7 +52,7 @@
           @click="newTaskPopupIsOpen = true"
       >
         <img src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
-        <span>Add task</span>
+        Add task
       </button>
     </div>
   </div>
@@ -125,7 +125,7 @@ const newTask = ref<Task>({
   status: '',
   startDate: '',
   priority: '',
-  author: usersStore.currentUser? usersStore.currentUser.username : null,
+  author: usersStore.currentUser? usersStore.currentUser.username : '',
   columnId: props.column.id
 })
 const newTaskPopupIsOpen = ref<boolean>(false)
@@ -233,9 +233,10 @@ onUnmounted(() => {
     border: 0
     cursor: pointer
     align-items: center
+    font-family: 'Open Sans', sans-serif
     &:hover
       border-radius: 6px
-      background-color: #a7adb2
+      background-color: #c0c9d0
     & img
       width: 17px
       margin-right: 2px

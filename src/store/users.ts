@@ -7,7 +7,7 @@ export const useUsersStore = defineStore('users', () => {
   const currentUser = ref<User | null>(null)
   const admin = ref<User>({
     id: 1,
-    username: 'admin',
+    username: 'Admin',
     login: '123',
     password: '123',
     regDate: new Date().toDateString()
