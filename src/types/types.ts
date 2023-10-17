@@ -20,7 +20,7 @@ export interface Task {
   statusChangeDate?: string
   startDate: string
   deadlineDate?: string
-  priority: string
+  priority: keyof typeof Priorities
   author: string | null
   columnId: number | null
 }
@@ -31,7 +31,11 @@ export interface User {
   password: string
   regDate: string
 }
-export interface Option {
-  value: string
-  title: string
+export enum Priorities {
+  '' = 0,
+  Trivial = 1,
+  Minor = 2,
+  Normal = 3,
+  Critical = 4,
+  Blocker = 5
 }

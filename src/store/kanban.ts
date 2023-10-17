@@ -6,8 +6,7 @@ import {usePopupsFlagsStore} from "@/store/popupsFlags";
 
 export const useKanbanStore = defineStore('kanban', () => {
   const popupFlagsStore= usePopupsFlagsStore()
-  const priorities: string[] = ['Trivial', 'Minor', 'Normal', 'Critical', 'Blocker']
-  const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Closed', 'Testing']
+  const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Testing', 'Closed']
   const boards = ref<Board[]>([
     {
       id: 1,
@@ -32,7 +31,7 @@ export const useKanbanStore = defineStore('kanban', () => {
           description: null,
           status: 'Open',
           startDate: '00.00.00',
-          priority: 'Minor',
+          priority: 'Trivial',
           author: 'Admin',
           columnId: 1
         }],
@@ -54,7 +53,7 @@ export const useKanbanStore = defineStore('kanban', () => {
           },],
           boardId: 1
         }],
-      availableStatuses: ['Closed', 'Testing']
+      availableStatuses: ['Testing', 'Closed']
     },
   ])
   const searchValue = ref<string>('')
@@ -77,7 +76,6 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   return {
     boards,
-    priorities,
     statuses,
     searchValue,
     searchTasks,

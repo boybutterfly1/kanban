@@ -1,52 +1,60 @@
 <template>
   <div
-      v-if="column"
-      class="column"
       @dragover.prevent
       @dragenter.prevent
-      @drop="dragAndDropStore.onDrop(column, board)"
+      draggable="true"
+      @dragstart="columnDADStore.onDrag($event, column)"
+      @dragend="columnDADStore.dragEnd"
   >
-    <div class="column__header">
-      <div class="column__header__name">
-        <span>{{column.name}}</span>
-        {{column.tasksList.length}}
-      </div>
-      <div class="column__header__buttons">
-        <img
-            @click="newTaskPopupIsOpen = true"
-            src="https://img.icons8.com/ios/50/000000/plus-math--v1.png"
-            alt="add task"
-        >
-        <img src="https://img.icons8.com/ios-glyphs/50/000000/more.png" alt="edit column">
-      </div>
-    </div>
-    <hr>
-    <task-comp
-        v-for="task in searchTasks"
-        :key="task.id"
-        :task="task"
-    />
-    <div v-if="isDropArea">
-      <div v-for="status in column.statuses">
-        <div
-            class="column__drop-area"
-            :class="{ 'column__drop-area__dragover': isDragOver[status] }"
-            @dragover="setDragOver(status,true)"
-            @dragleave="setDragOver(status, false)"
-            @drop="dragAndDropStore.onDrop(column, board, status); setDragOver(status, false)"
-        >
-          <span>{{ status }}</span>
+    <div
+        v-if="column"
+        class="column"
+        @dragover.prevent
+        @dragenter.prevent
+        @drop="column.statuses.length === 1 ? taskDADStore.onDrop(column, board): null"
+    >
+      <div class="column__header">
+        <div class="column__header__name">
+          <span>{{column.name}}</span>
+          {{column.tasksList.length}}
+        </div>
+        <div class="column__header__buttons">
+          <img
+              @click="newTaskPopupIsOpen = true"
+              src="https://img.icons8.com/ios/50/000000/plus-math--v1.png"
+              alt="add task"
+          >
+          <img src="https://img.icons8.com/ios-glyphs/50/000000/more.png" alt="edit column">
         </div>
       </div>
+      <hr>
+      <task-comp
+          v-for="task in sortAndSearchBy2(sortValue)"
+          :key="task.id"
+          :task="task"
+      />
+      <div v-if="isDropArea">
+        <div v-for="status in column.statuses">
+          <div
+              class="column__drop-area"
+              :class="{ 'column__drop-area__dragover': isDragOver[status] }"
+              @dragover="setDragOver(status,true)"
+              @dragleave="setDragOver(status, false)"
+              @drop="taskDADStore.onDrop(column, board, status); setDragOver(status, false)"
+          >
+            <span>{{ status }}</span>
+          </div>
+        </div>
+      </div>
+      <button
+          v-if="column.id === board.columns[0].id"
+          class="column__add-task-btn"
+          @click="newTaskPopupIsOpen = true"
+      >
+        <img src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
+        <span>Add task</span>
+      </button>
     </div>
-    <button
-        v-if="column.id === board.columns[0].id"
-        class="column__add-task-btn"
-        @click="newTaskPopupIsOpen = true"
-    >
-      <img src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
-      <span>Add task</span>
-    </button>
   </div>
   <my-popup
       :is-open="newTaskPopupIsOpen"
@@ -75,7 +83,7 @@
           v-model="newTask.status"
       />
       <my-select
-          :array="kanbanStore.priorities"
+          :enum="Priorities"
           v-model="newTask.priority"
           select-name="Task priority"
       />
@@ -91,7 +99,7 @@
 <script setup lang="ts">
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
-import {Board, Column, Task} from "@/types/types";
+import {Board, Column, Priorities, Task} from "@/types/types";
 import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
@@ -100,13 +108,15 @@ import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
-const popupsFlagsStore = usePopupsFlagsStore()
-const dragAndDropStore = useTaskDragAndDropStore()
+import {useColumnDragAndDropStore} from "@/store/columnDragAndDrop";
+const taskDADStore = useTaskDragAndDropStore()
+const columnDADStore = useColumnDragAndDropStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   column: Column
   board: Board
+  sortValue: string
 }>()
 const newTask = ref<Task>({
   id: null,
@@ -123,19 +133,32 @@ const isDragOver = ref<Record<string, boolean>>({})
 const setDragOver = (status: string, value: boolean) => {
   isDragOver.value[status] = value;
 };
-// const isDroppableArea = ref(false)
 const isDropArea = computed<boolean>(() => {
-  return  isColumnNotOpen.value && dragAndDropStore.isDroppableArea && isDragColNotDropCol.value && props.column.statuses.length > 1
+  return  isColumnNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea && props.column.statuses.length > 1
 })
-const isColumnNotOpen = computed<boolean>(() => {
+function isColumnNotOpen(): boolean {
   return !props.column.statuses.some((status: string) => status === 'Open')
-})
-const isDragColNotDropCol = computed<boolean>(() => {
-  return dragAndDropStore.dragTask ? dragAndDropStore.dragTask.columnId !== props.column.id : false
-})
+}
+function isDragColNotDropCol():boolean {
+  return taskDADStore.dragTask ? taskDADStore.dragTask.columnId !== props.column.id : false
+}
 const searchTasks = computed<Task[]>(() => {
   return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
 })
+function sortAndSearchBy2(value: string):Task[] {
+  const values: Record<string, Task[]> = {
+    'Priority' : [...searchTasks.value].sort((task1: Task, task2: Task) => {
+      return Priorities[task1.priority] - Priorities[task2.priority];
+    }).reverse(),
+    'Start Date' : [...searchTasks.value].sort((task1: Task, task2: Task) => {
+      return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
+    }).reverse(),
+    'Deadline' : [...searchTasks.value.filter((task: Task) => {task.deadlineDate})].sort((task1: Task, task2: Task) => {
+      return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
+    }).reverse(),
+  }
+  return values[value] || searchTasks.value
+}
 function newTaskPopupClose() {
   newTask.value.name = ''
   newTask.value.description = ''
@@ -147,6 +170,7 @@ function addNewTask() {
   if (newTask.value.name && newTask.value.status && newTask.value.priority) {
     newTask.value.id = Date.now()
     newTask.value.startDate = new Date().toLocaleString()
+    console.log(newTask.value.startDate)
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
   }
@@ -168,7 +192,7 @@ onUnmounted(() => {
 .column
   display: flex
   flex-direction: column
-  width: 250px
+  width: 300px
   gap: 10px
   margin-right: 30px
   &__header
@@ -230,7 +254,7 @@ onUnmounted(() => {
       outline: none
       box-shadow: 0 0 5px #3f74e3
 hr
-  width: 255px
+  width: 300px
   margin-bottom: 10px
   border: 0
   height: 1px

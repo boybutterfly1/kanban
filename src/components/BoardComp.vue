@@ -12,7 +12,12 @@
             placeholder="Search by task"
           />
         </div>
-        <div>Sort by</div>
+        <div>
+          <MySelect
+            :array="tasksSortValuesArray"
+            v-model="tasksSortValue"
+          />
+        </div>
         <div>Filters</div>
       </div>
     </div>
@@ -23,11 +28,13 @@
           :key="column.id"
           :column="column"
           :board="board"
+          :sort-value="tasksSortValue"
         />
           <img
+            v-if="board.availableStatuses.length > 0"
             class="btn"
             src="https://img.icons8.com/ios/50/000000/plus--v1.png"
-            alt="plus--v1"
+            alt="add column"
             @click="popupsFlagsStore.newColumnPopupIsOpen = true"
           />
       </div>
@@ -91,7 +98,9 @@ const newColumn = ref<Column>({
   boardId: props.board.id
 })
 
-const selectedStatus = ref<string>('')
+const tasksSortValuesArray = ref(['Default', 'Priority', 'Deadline', 'Start Date'])
+const tasksSortValue = ref('')
+const selectedStatus = ref('')
 
 function addStatus(newStatus:string) {
   newColumn.value.statuses.push(newStatus)

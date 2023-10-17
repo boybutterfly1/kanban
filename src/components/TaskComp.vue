@@ -1,12 +1,12 @@
 <template>
   <div
-       v-if="task"
-       class="task"
-       @click="taskDetailsIsOpen = !taskDetailsIsOpen"
-       :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':dragAndDropStore.isGrabbed}"
-       draggable="true"
-       @dragstart="dragAndDropStore.onDrag($event, task)"
-       @dragend="dragAndDropStore.isDroppableArea = false"
+      v-if="task"
+      class="task"
+      @click="taskDetailsIsOpen = !taskDetailsIsOpen"
+      :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':taskDADStore.isGrabbed}"
+      draggable="true"
+      @dragstart="taskDADStore.onDrag($event, task)"
+      @dragend="taskDADStore.isDroppableArea = false"
   >
     <div class="task__header">
       <div class="popup">
@@ -22,7 +22,7 @@
     <span class="task__title">{{task.name}}</span>
     <div class="task__status">
       <div
-        :class="getStatusClass(task.status)"
+          :class="getStatusClass(task.status)"
       >
         {{task.status}}
       </div>
@@ -38,20 +38,20 @@ import {Task} from "@/types/types";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
 import {ref} from "vue";
 const taskDetailsIsOpen = ref<boolean>(false)
-const dragAndDropStore = useTaskDragAndDropStore()
+const taskDADStore = useTaskDragAndDropStore()
 const props = defineProps<{
   task: Task
 }>()
 const emits = defineEmits(['dragEnd','dragStart'])
 function getStatusClass(status: string): string {
-    return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
+  return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
 </script>
 
 <style lang="sass" scoped>
 .task
-  width: 250px
-  height: 100px
+  width: 300px
+  height: 110px
   border-radius: 15px
   border: 1px solid #d9d9d9
   display: flex
@@ -67,6 +67,7 @@ function getStatusClass(status: string): string {
     display: flex
     align-items: center
     justify-content: space-between
+    cursor: pointer
     & img
       width: 17px
       cursor: pointer
@@ -76,7 +77,7 @@ function getStatusClass(status: string): string {
     &__id
       width: 120px
     & span
-        font-size: 12px
+      font-size: 12px
   &__details-open
     background-color: #ddeaf6
   &__details-closed
@@ -87,8 +88,9 @@ function getStatusClass(status: string): string {
     font-size: 14px
   &__status
     display: flex
-    font-size: 12px
+    font-size: 10px
     border-radius: 5px
+    cursor: pointer
     & .open
       padding: 1px 5px
       background-color: #c0c9d0
