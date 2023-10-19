@@ -74,11 +74,11 @@ export const useKanbanStore = defineStore('kanban', () => {
   })
 
   function changePage(route: string) {
+    router.push(route);
     loading.value = true
     setTimeout(() => {
-      router.push(route);
       loading.value = false
-    }, 1000);
+    }, 2000);
   }
 
   return {

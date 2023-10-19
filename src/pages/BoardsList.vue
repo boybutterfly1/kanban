@@ -1,6 +1,5 @@
 <template>
-  <div class="boards"
-  v-if="!kanbanStore.loading">
+  <div class="boards">
     <div class="boards__header">
       <div class="boards__header__name">
         <span>Boards</span>
@@ -50,7 +49,6 @@
       </table>
     </div>
   </div>
-  <loading v-else/>
   <my-popup
       :is-open="popupFlagsStore.createBoardPopupIsOpen"
       @close="createBoardPopupClose"

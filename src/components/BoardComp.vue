@@ -1,33 +1,29 @@
 <template>
-  <div class="board">
+  <div v-if="!kanbanStore.loading"
+       class="board"
+  >
     <div class="board__header">
       <div class="board__header__name">
         <span>{{board.name}}</span>
       </div>
       <div class="board__header__options">
-        <div>
           <my-input
             v-model="kanbanStore.searchValue"
             type="text"
             placeholder="Search by task"
           />
-        </div>
-        <div>
-          <MySelect
+          <my-select
             :array="tasksSortValuesArray"
             v-model="tasksSortValue"
             select-name="Sort by"
           />
-        </div>
-        <div>
           <button
               @click="isShowFilters = !isShowFilters"
               :class="{'active' : isShowFilters, 'filters-selected' : selectedFilterOption}"
           >
-            <img src="https://img.icons8.com/material-outlined/24/484747/filter--v1.png" alt="filter"/>
+            <img src="https://img.icons8.com/ios-filled/50/484747/horizontal-settings-mixer--v1.png" alt="filter"/>
             Filters
           </button>
-        </div>
       </div>
     </div>
     <hr>
@@ -36,11 +32,14 @@
         class="board__header__options__filters"
     >
       <div class="filters-container">
-        <div class="filter"
-             v-for="filter in filtersArray"
-             :key="Object.keys(filter)[0]"
-             @click="openFilterPopup(filter)"
+        <div
+          class="filter"
+          :class="{'active' : Object.values(filter)[0].length > 0}"
+          v-for="filter in filtersArray"
+          :key="Object.keys(filter)[0]"
+          @click="openFilterPopup(filter)"
         >
+          <img src="https://img.icons8.com/android/24/484747/filter.png" alt="filter"/>
           {{Object.keys(filter)[0]}}
           <span v-if="Object.values(filter)[0].length > 0">{{': ' + Object.values(filter)[0].join(', ')}}</span>
         </div>
@@ -87,55 +86,115 @@
           :board="board"
           :sort-value="tasksSortValue"
         />
-          <img
-            v-if="board.availableStatuses.length > 0"
-            class="btn"
-            src="https://img.icons8.com/ios/50/000000/plus--v1.png"
-            alt="add column"
-            @click="popupsFlagsStore.newColumnPopupIsOpen = true"
-          />
+            <img
+                v-if="board.availableStatuses.length > 0"
+                class="btn"
+                src="https://img.icons8.com/ios/50/plus-math--v1.png"
+                alt="add column"
+                @click="popupsFlagsStore.newColumnPopupIsOpen = true"
+            />
       </div>
-  </div>
-  <my-popup
-    :is-open="popupsFlagsStore.newColumnPopupIsOpen"
-    @close="newColumnPopupClose"
-  >
-    <form @submit.prevent class="new-column">
-      <my-select
-        v-model="selectedStatus"
-        :array="props.board.availableStatuses"
-        @change="addStatus(selectedStatus)"
-        select-name="Column statuses"
-      />
-      <div class="new-column__statuses">
-        <div class="new-column__statuses__status"
-          v-for="status in newColumn.statuses"
-          @click="deleteStatus(status)"
-        >
-          {{status}}
-          <img src="https://img.icons8.com/ios-filled/50/multiply.png" alt="delete status"/>
+    <my-popup
+        :is-open="popupsFlagsStore.newColumnPopupIsOpen"
+        @close="newColumnPopupClose"
+    >
+      <form @submit.prevent class="new-column">
+        <my-select
+            v-model="selectedStatus"
+            :array="props.board.availableStatuses"
+            @change="addStatus(selectedStatus)"
+            select-name="Column statuses"
+        />
+        <div class="new-column__statuses">
+          <div class="new-column__statuses__status"
+               v-for="status in newColumn.statuses"
+               @click="deleteStatus(status)"
+          >
+            {{status}}
+            <img src="https://img.icons8.com/ios-filled/50/multiply.png" alt="delete status"/>
+          </div>
         </div>
+        <my-input
+            v-model="newColumn.name"
+            type="text"
+            placeholder="Column name"
+        />
+        <my-button
+            @click="addNewColumn"
+        >
+          Add
+        </my-button>
+      </form>
+    </my-popup>
+  </div>
+
+  <div v-else class="board-skeleton">
+    <div class="board-skeleton__header">
+      <div class="board-skeleton__header__name"/>
+      <div class="board-skeleton__header__options">
+        <div
+            style="width: 159px"/>
+        <div
+            style="width: 85px"/>
+        <div
+            style="width: 70px"/>
       </div>
-      <my-input
-        v-model="newColumn.name"
-        type="text"
-        placeholder="Column name"
-      />
-      <my-button
-        @click="addNewColumn"
-      >
-        Add
-      </my-button>
-    </form>
-  </my-popup>
-
-
+    </div>
+    <hr>
+<!--    <div class="board-skeleton__header__options__filters">-->
+<!--      <div class="filters-container">-->
+<!--        <div class="filter"/>-->
+<!--      </div>-->
+<!--      <hr>-->
+<!--    </div>-->
+    <div class="board__container">
+      <div class="column-skeleton">
+        <div class="column-skeleton__header">
+          <div class="column-skeleton__header__name">
+            <div/>
+          </div>
+        </div>
+        <hr>
+        <div class="task-skeleton"/>
+      </div>
+      <div class="column-skeleton">
+        <div class="column-skeleton__header">
+          <div class="column-skeleton__header__name">
+            <div/>
+          </div>
+        </div>
+        <hr>
+        <div class="task-skeleton"/>
+        <div class="task-skeleton"/>
+        <div class="task-skeleton"/>
+      </div>
+      <div class="column-skeleton">
+        <div class="column-skeleton__header">
+          <div class="column-skeleton__header__name">
+            <div/>
+          </div>
+        </div>
+        <hr>
+        <div class="task-skeleton"/>
+        <div class="task-skeleton"/>
+      </div>
+      <div class="column-skeleton">
+        <div class="column-skeleton__header">
+          <div class="column-skeleton__header__name">
+            <div/>
+          </div>
+        </div>
+        <hr>
+        <div class="task-skeleton"/>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
 import {Board, Column, User} from "@/types/types";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watchEffect} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MySelect from "@/components/UI/MySelect.vue";
@@ -145,6 +204,7 @@ import {usePopupsFlagsStore} from "@/store/popupsFlags";
 import {useUsersStore} from "@/store/users";
 import router from "@/router";
 import {useRoute} from "vue-router";
+import TaskComp from "@/components/TaskComp.vue";
 const usersStore = useUsersStore()
 const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
@@ -253,10 +313,6 @@ function newColumnPopupClose() {
   newColumn.value.name = ''
   popupsFlagsStore.newColumnPopupIsOpen = false
 }
-
-onMounted(() => {
-  console.log(useRoute())
-})
 </script>
 
 <style lang="sass" scoped>
@@ -274,10 +330,10 @@ onMounted(() => {
       margin-bottom: 5px
     &__options
       display: flex
-      & div
-        margin-left: 20px
+      gap: 20px
       & button
         margin-top: 1px
+        margin-bottom: 10px
         font-family: 'Open Sans', sans-serif
         font-size: 14px
         padding: 1px 5px
@@ -317,11 +373,14 @@ onMounted(() => {
             border: none
             background-color: #cbd3da
             cursor: pointer
+            &.active
+              background-color: #a4baec
             &:hover
               background-color: #a7adb2
             & img
-              width: 15px
-              height: 15px
+              width: 13px
+              height: 13px
+              margin-right: 2px
           & .filterOptionsPopup
             display: flex
             flex-direction: column
@@ -347,16 +406,83 @@ onMounted(() => {
                   vertical-align: -3.5px
   &__container
     display: flex
-    overflow-x: auto
-    white-space: nowrap
     & .btn
       width: 30px
       height: 30px
       border: none
       cursor: pointer
-      border-radius: 50%
+      border-radius: 15%
       &:hover
         background-color: #a7adb2
+
+.board-skeleton
+  padding: 55px 40px
+  display: flex
+  flex-direction: column
+  &__header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    &__name
+      height: 30px
+      width: 175px
+      margin-bottom: 10px
+      border-radius: 5px
+      background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
+      background-size: 200% 200%
+      animation: gradientAnimation 1.5s linear infinite
+    &__options
+      margin-bottom: 5px
+      display: flex
+      gap: 20px
+      & div
+        height: 24px
+        border-radius: 5px
+        background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
+        background-size: 200% 200%
+        animation: gradientAnimation 1.5s linear infinite
+      &__filters
+        display: flex
+        margin-bottom: 10px
+        flex-direction: column
+        & .filters-container
+          display: flex
+          margin-bottom: 10px
+          justify-content: flex-start
+          & .filter
+            height: 24px
+            width: 160px
+            border-radius: 5px
+            background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
+            background-size: 200% 200%
+            animation: gradientAnimation 1.5s linear infinite
+.column-skeleton
+  display: flex
+  flex-direction: column
+  width: 300px
+  gap: 10px
+  margin-right: 30px
+  &__header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    width: 100%
+    &__name
+      width: 50%
+      & div
+        height: 21.5px
+        width: 100%
+        border-radius: 5px
+        background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
+        background-size: 200% 200%
+        animation: gradientAnimation 1.5s linear infinite
+.task-skeleton
+  width: 300px
+  height: 110px
+  border-radius: 15px
+  background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
+  background-size: 200% 200%
+  animation: gradientAnimation 1.5s linear infinite
 .new-column
   display: flex
   flex-direction: column
@@ -381,6 +507,15 @@ onMounted(() => {
         width: 15px
         height: 15px
         vertical-align: -3.5px
+@keyframes gradientAnimation
+  0%
+    background-position: 0 0
+
+  50%
+    background-position: 100% 0
+
+  100%
+    background-position: 0 0
 hr
   width: 100%
   margin-bottom: 10px

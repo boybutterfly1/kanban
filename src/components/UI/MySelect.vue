@@ -73,7 +73,7 @@ function getOptions(array: string[]) {
 
 <style lang="sass" scoped>
 select
-  margin-bottom: 5px
+  margin-bottom: 10px
   font-family: 'Open Sans', sans-serif
   border-radius: 5px
   border: 1px solid #d9d9d9
