@@ -2,7 +2,6 @@
   <div
       @dragover.prevent
       @dragenter.prevent
-      draggable="true"
       @dragstart="columnDADStore.onDrag($event, column)"
       @dragend="columnDADStore.dragEnd"
   >
@@ -42,7 +41,7 @@
               @dragleave="setDragOver(status, false)"
               @drop="taskDADStore.onDrop(column, board, status); setDragOver(status, false)"
           >
-            <span>{{ status }}</span>
+            <span v-if="props.column.statuses.length > 1">{{ status }}</span>
           </div>
         </div>
       </div>
@@ -134,7 +133,7 @@ const setDragOver = (status: string, value: boolean) => {
   isDragOver.value[status] = value;
 };
 const isDropArea = computed<boolean>(() => {
-  return  isColumnNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea && props.column.statuses.length > 1
+  return  isColumnNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea
 })
 function isColumnNotOpen(): boolean {
   return !props.column.statuses.some((status: string) => status === 'Open')

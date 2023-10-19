@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-
 </script>
 
 <style lang="sass">
@@ -15,7 +14,7 @@
   box-sizing: border-box
 .app
   font-family: 'Open Sans', sans-serif
-  background-color: #e8ebef
+  background-color: #f8f8f8
   min-height: 100vh
 
 </style>

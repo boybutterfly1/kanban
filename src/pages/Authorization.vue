@@ -1,4 +1,5 @@
 <template>
+  <img src="" alt="picture">
   <div
       class="auth"
       v-if="!kanbanStore.loading"
@@ -135,8 +136,8 @@ function register(currentUser: User) {
   & form
     display: flex
     flex-direction: column
-    align-items: center
     & span
+      align-self: center
       font-size: 13px
       cursor: pointer
       color: #6b6a6a

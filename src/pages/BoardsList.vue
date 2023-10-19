@@ -78,9 +78,8 @@ import MyButton from "@/components/UI/MyButton.vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import {computed, onUnmounted, ref} from "vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
-import {Board, Task} from "@/types/types";
+import {Board} from "@/types/types";
 import {useUsersStore} from "@/store/users";
-import router from "@/router";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
 import Loading from "@/components/UI/Loading.vue";
 const popupFlagsStore = usePopupsFlagsStore()
@@ -117,7 +116,7 @@ onUnmounted(() => {
 <style lang="sass" scoped>
 .boards
   display: flex
-  padding: 40px
+  padding: 55px 40px
   flex-direction: column
   &__header
     display: flex

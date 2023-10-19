@@ -254,9 +254,9 @@ function newColumnPopupClose() {
 
 <style lang="sass" scoped>
 .board
+  padding: 55px 40px
   display: flex
   flex-direction: column
-  padding: 40px
   &__header
     display: flex
     justify-content: space-between

@@ -57,7 +57,7 @@ function getStatusClass(status: string): string {
   display: flex
   flex-direction: column
   justify-content: space-between
-  box-shadow: 5px 5px 10px rgba(0,0,0,0.1)
+  box-shadow: 5px 10px 10px rgba(0,0,0,0.1)
   transition: 0.3s ease
   padding: 15px
   cursor: grab
