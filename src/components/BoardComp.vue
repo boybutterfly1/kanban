@@ -416,6 +416,8 @@ function newColumnPopupClose() {
                   vertical-align: -3.5px
   &__container
     display: flex
+    overflow-x: auto
+    white-space: nowrap
     & .btn
       width: 30px
       height: 30px
