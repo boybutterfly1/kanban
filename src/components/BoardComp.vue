@@ -135,7 +135,7 @@
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
 import {Board, Column, User} from "@/types/types";
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MySelect from "@/components/UI/MySelect.vue";
@@ -143,6 +143,8 @@ import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
 import {useUsersStore} from "@/store/users";
+import router from "@/router";
+import {useRoute} from "vue-router";
 const usersStore = useUsersStore()
 const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
@@ -251,6 +253,10 @@ function newColumnPopupClose() {
   newColumn.value.name = ''
   popupsFlagsStore.newColumnPopupIsOpen = false
 }
+
+onMounted(() => {
+  console.log(useRoute())
+})
 </script>
 
 <style lang="sass" scoped>

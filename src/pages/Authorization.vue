@@ -1,5 +1,4 @@
 <template>
-  <img src="" alt="picture">
   <div
       class="auth"
       v-if="!kanbanStore.loading"

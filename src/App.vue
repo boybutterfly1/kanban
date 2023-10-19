@@ -1,12 +1,15 @@
 <template>
   <div class="app">
-    <navbar/>
+    <navbar v-if="route.path !== '/authorization'"/>
     <router-view/>
   </div>
 </template>
 
 <script setup lang="ts">
 import Navbar from "@/components/Navbar.vue";
+import {useRoute} from "vue-router";
+
+const route = useRoute()
 </script>
 
 <style lang="sass">
