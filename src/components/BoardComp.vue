@@ -187,6 +187,16 @@
         <hr>
         <div class="task-skeleton"/>
       </div>
+      <div class="column-skeleton">
+        <div class="column-skeleton__header">
+          <div class="column-skeleton__header__name">
+            <div/>
+          </div>
+        </div>
+        <hr>
+        <div class="task-skeleton"/>
+        <div class="task-skeleton"/>
+      </div>
     </div>
   </div>
 </template>
@@ -466,12 +476,11 @@ function newColumnPopupClose() {
     display: flex
     align-items: center
     justify-content: space-between
-    width: 100%
+    width: 300px
     &__name
-      width: 50%
       & div
         height: 21.5px
-        width: 100%
+        width: 300px
         border-radius: 5px
         background: linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)
         background-size: 200% 200%
