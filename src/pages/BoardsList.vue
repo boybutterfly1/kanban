@@ -60,7 +60,7 @@
       <my-input
           v-model="newBoard.name"
           type="text"
-          placeholder="BoardName"
+          placeholder="Board Name"
       />
       <my-button
         @click="createBoard"

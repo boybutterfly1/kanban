@@ -81,7 +81,7 @@
     </div>
       <div class="board__container">
         <column-comp
-          v-for="column in board.columns"
+          v-for="column in props.board.columns"
           :key="column.id"
           :column="column"
           :board="board"
@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
-import {Board, Column, Task, User} from "@/types/types";
+import {Board, Column, User} from "@/types/types";
 import {computed, ref} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
@@ -176,7 +176,7 @@ const filterResult = computed<Column[]>(() => {
   const priorityConditions = filtersArray.value[1]['Priority']
   const authorConditions = filtersArray.value[2]['Author']
 
-  return props.board.columns.map((column: Column) => {
+  const result: Column[] = props.board.columns.map((column: Column) => {
     const filteredTasks = column.tasksList.filter((task) => {
       const statusMatch = statusConditions.length === 0 || statusConditions.includes(task.status)
       const priorityMatch = priorityConditions.length === 0 || priorityConditions.includes(task.priority)
@@ -185,6 +185,7 @@ const filterResult = computed<Column[]>(() => {
     });
     return { ...column, tasksList: filteredTasks }
   });
+  return result || props.board.columns
 });
 
 function filterOptionsArray(filter: string):string[] {
