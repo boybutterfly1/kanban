@@ -33,15 +33,15 @@
     >
       <div class="filters-container">
         <div
-          class="filter"
-          :class="{'active' : Object.values(filter)[0].length > 0}"
-          v-for="filter in filtersArray"
-          :key="Object.keys(filter)[0]"
-          @click="openFilterPopup(filter)"
+            class="filter"
+            :class="{'active' : filtersObject[filter].length > 0}"
+            v-for="filter in Object.keys(filtersObject)"
+            :key="filter"
+            @click="openFilterPopup(filter)"
         >
           <img src="https://img.icons8.com/android/24/484747/filter.png" alt="filter"/>
-          {{Object.keys(filter)[0]}}
-          <span v-if="Object.values(filter)[0].length > 0">{{': ' + Object.values(filter)[0].join(', ')}}</span>
+          {{ filter }}
+          <span v-if="filtersObject[filter].length ">{{': ' + filtersObject[filter].join(', ')}}</span>
         </div>
         <my-popup
             :is-open="isFilterPopupOpen"
@@ -53,8 +53,8 @@
           >
             <my-select
               v-model="selectedFilterOption"
-              :array="filterOptionsArray(Object.keys(selectedFilter)[0])"
-              :select-name="'Select ' + Object.keys(selectedFilter)[0]"
+              :array="filterOptionsArray(selectedFilter)"
+              :select-name="'Select ' + selectedFilter.toLowerCase()"
               @change="addToSelectedFilterOptionsArray"
             />
 
@@ -85,9 +85,10 @@
           :column="column"
           :board="board"
           :sort-value="tasksSortValue"
+          :filters="filtersObject"
         />
             <img
-                v-if="board.availableStatuses.length > 0"
+                v-if="board.availableStatuses.length"
                 class="btn"
                 src="https://img.icons8.com/ios/50/plus-math--v1.png"
                 alt="add column"
@@ -204,7 +205,7 @@
 <script setup lang="ts">
 import ColumnComp from "@/components/ColumnComp.vue";
 import {Board, Column, User} from "@/types/types";
-import {computed, onMounted, ref, watchEffect} from "vue";
+import {computed, ref} from "vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MySelect from "@/components/UI/MySelect.vue";
@@ -212,9 +213,6 @@ import {useKanbanStore} from "@/store/kanban";
 import MyButton from "@/components/UI/MyButton.vue";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
 import {useUsersStore} from "@/store/users";
-import router from "@/router";
-import {useRoute} from "vue-router";
-import TaskComp from "@/components/TaskComp.vue";
 const usersStore = useUsersStore()
 const popupsFlagsStore = usePopupsFlagsStore()
 const kanbanStore = useKanbanStore()
@@ -234,31 +232,15 @@ const isShowFilters = ref(false)
 const tasksSortValuesArray = ref(['Default', 'Priority', 'Deadline', 'Start Date'])
 const tasksSortValue = ref('')
 const selectedStatus = ref('')
-const filtersArray = ref<{ [key: string]: string[] }[]>([
-  { Status: [] },
-  { Priority: [] },
-  { Author: [] },
-]);
+
+const filtersObject = ref<Record<string, string[]>>({
+  Status: [],
+  Priority: [],
+  Author: []
+})
+const selectedFilter = ref('')
 const selectedFilterOption = ref('')
-const selectedFilter = ref<{ [key: string]: string[] }>({})
 const selectedFilterOptionsArray = ref<string[]>([])
-
-const filterResult = computed<Column[]>(() => {
-  const statusConditions = filtersArray.value[0]['Status']
-  const priorityConditions = filtersArray.value[1]['Priority']
-  const authorConditions = filtersArray.value[2]['Author']
-
-  const result: Column[] = props.board.columns.map((column: Column) => {
-    const filteredTasks = column.tasksList.filter((task) => {
-      const statusMatch = statusConditions.length === 0 || statusConditions.includes(task.status)
-      const priorityMatch = priorityConditions.length === 0 || priorityConditions.includes(task.priority)
-      const authorMatch = authorConditions.length === 0 || authorConditions.includes(task.author)
-      return statusMatch && priorityMatch && authorMatch
-    });
-    return { ...column, tasksList: filteredTasks }
-  });
-  return result || props.board.columns
-});
 
 function filterOptionsArray(filter: string):string[] {
   const filters: Record<string, string[]> = {
@@ -269,29 +251,31 @@ function filterOptionsArray(filter: string):string[] {
   return filters[filter]
 }
 function addToSelectedFilterOptionsArray() {
-  if (!selectedFilterOptionsArray.value.some(options => options === selectedFilterOption.value)) {
+  if (!selectedFilterOptionsArray.value.some((option: string) => option === selectedFilterOption.value)) {
     selectedFilterOptionsArray.value.push(selectedFilterOption.value)
+    console.log('addToSelectedFilterOptionsArray', filtersObject.value)
   }
 }
 function applyFilterPopup() {
-  const key = Object.keys(selectedFilter.value)[0]
-  selectedFilter.value[key] = [...selectedFilterOptionsArray.value]
+  filtersObject.value[selectedFilter.value] = [...selectedFilterOptionsArray.value]
   selectedFilterOptionsArray.value = []
   selectedFilterOption.value = ''
   isFilterPopupOpen.value = false
+  console.log('applyFilterPopup', filtersObject.value)
 }
 function closeFilterPopup() {
   selectedFilterOptionsArray.value = []
   isFilterPopupOpen.value = false
   selectedFilterOption.value = ''
-
+  console.log('closeFilterPopup', filtersObject.value)
 }
-function openFilterPopup(filter: object) {
+function openFilterPopup(filter: string) {
   isFilterPopupOpen.value = true
   selectedFilter.value = filter
-  if (Object.values(filter)[0].length > 0){
-    selectedFilterOptionsArray.value = Object.values(filter)[0]
+  if (filtersObject.value[filter].length){
+    selectedFilterOptionsArray.value = [...filtersObject.value[filter]]
   }
+  console.log('openFilterPopup', filtersObject.value)
 }
 function deleteOption(selectedOption:string) {
   selectedFilterOptionsArray.value = selectedFilterOptionsArray.value.filter((option: string) => {
@@ -310,7 +294,7 @@ function deleteStatus(selectedStatus:string) {
   }
 }
 function addNewColumn() {
-  if (newColumn.value.name && newColumn.value.statuses.length > 0) {
+  if (newColumn.value.name && newColumn.value.statuses.length) {
     newColumn.value.id = Date.now()
     props.board.columns.push({...newColumn.value})
     props.board.availableStatuses = props.board.availableStatuses.filter((status: string) => !newColumn.value.statuses.includes(status))

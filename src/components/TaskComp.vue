@@ -2,7 +2,8 @@
   <div
       v-if="task"
       class="task"
-      @click="taskDetailsIsOpen = !taskDetailsIsOpen"
+      @click.stop
+      @click="toggleTaskDetails"
       :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':taskDADStore.isGrabbed}"
       draggable="true"
       @dragstart="taskDADStore.onDrag($event, task)"
@@ -28,7 +29,10 @@
       </div>
     </div>
   </div>
-  <div :class="{ 'menu-open': taskDetailsIsOpen }" class="side-menu">
+  <div
+      :class="{ 'menu-open': taskDetailsIsOpen }"
+      class="side-menu"
+  >
     {{task.name}}
   </div>
 </template>
@@ -36,16 +40,47 @@
 <script setup lang="ts">
 import {Task} from "@/types/types";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
-import {ref} from "vue";
-const taskDetailsIsOpen = ref<boolean>(false)
+import {onBeforeUnmount, onMounted, ref} from "vue";
+
 const taskDADStore = useTaskDragAndDropStore()
 const props = defineProps<{
-  task: Task
+  task: Task,
+  taskIndex: number
 }>()
 const emits = defineEmits(['dragEnd','dragStart'])
+
+const taskDetailsIsOpen = ref<boolean>(false)
+const taskElement = ref<HTMLElement | null>(null);
+const elementToHide = ref<HTMLElement | null>(null);
+const taskDetailsOpen = ref<number>(-1)
 function getStatusClass(status: string): string {
   return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
+const toggleTaskDetails = () => {
+  // Закрываем детали предыдущей задачи, если они открыты
+  if (taskDetailsOpen.value !== -1) {
+    taskDetailsOpen.value = -1;
+  }
+
+  // Открываем/закрываем детали текущей задачи
+  taskDetailsOpen.value = taskDetailsOpen.value === props.taskIndex ? -1 : props.taskIndex;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (elementToHide.value && !elementToHide.value.contains(event.target as Node)) {
+    taskDetailsIsOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  elementToHide.value = document.querySelector('.side-menu');
+  taskElement.value = document.querySelector('.task');
+  document.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style lang="sass" scoped>

@@ -28,9 +28,10 @@
       </div>
       <hr>
       <task-comp
-          v-for="task in sortAndSearchBy2(sortValue)"
+          v-for="(task,index) in filteredSortedSearchedTasks"
           :key="task.id"
           :task="task"
+          :taskIndex="index"
       />
       <div v-if="isDropArea">
         <div v-for="status in column.statuses">
@@ -99,14 +100,13 @@
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board, Column, Priorities, Task} from "@/types/types";
-import {computed, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, onUnmounted, ref} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MyButton from "@/components/UI/MyButton.vue";
 import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
-import {usePopupsFlagsStore} from "@/store/popupsFlags";
 import {useColumnDragAndDropStore} from "@/store/columnDragAndDrop";
 const taskDADStore = useTaskDragAndDropStore()
 const columnDADStore = useColumnDragAndDropStore()
@@ -116,6 +116,7 @@ const props = defineProps<{
   column: Column
   board: Board
   sortValue: string
+  filters: Record<string, string[]>
 }>()
 const newTask = ref<Task>({
   id: null,
@@ -133,31 +134,41 @@ const setDragOver = (status: string, value: boolean) => {
   isDragOver.value[status] = value;
 };
 const isDropArea = computed<boolean>(() => {
-  return  isColumnNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea
+  return  isColumnNameNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea
 })
-function isColumnNotOpen(): boolean {
+function isColumnNameNotOpen(): boolean {
   return !props.column.statuses.some((status: string) => status === 'Open')
 }
 function isDragColNotDropCol():boolean {
   return taskDADStore.dragTask ? taskDADStore.dragTask.columnId !== props.column.id : false
 }
-const searchTasks = computed<Task[]>(() => {
+const searchedTasks = computed<Task[]>(() => {
   return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
 })
-function sortAndSearchBy2(value: string):Task[] {
+const sortedSearchedTasks = computed<Task[]>(() => {
   const values: Record<string, Task[]> = {
-    'Priority' : [...searchTasks.value].sort((task1: Task, task2: Task) => {
+    'Priority' : [...searchedTasks.value].sort((task1: Task, task2: Task) => {
       return Priorities[task1.priority] - Priorities[task2.priority];
     }).reverse(),
-    'Start Date' : [...searchTasks.value].sort((task1: Task, task2: Task) => {
+    'Start Date' : [...searchedTasks.value].sort((task1: Task, task2: Task) => {
       return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
     }).reverse(),
-    'Deadline' : [...searchTasks.value.filter((task: Task) => {task.deadlineDate})].sort((task1: Task, task2: Task) => {
+    'Deadline' : [...searchedTasks.value.filter((task: Task) => {task.deadlineDate})].sort((task1: Task, task2: Task) => {
       return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
     }).reverse(),
   }
-  return values[value] || searchTasks.value
-}
+  return values[props.sortValue] || searchedTasks.value
+})
+const filteredSortedSearchedTasks = computed<Task[]>(() => {
+  return sortedSearchedTasks.value.filter((task) => {
+    return [
+      !props.filters['Status'].length || props.filters['Status'].includes(task.status),
+      !props.filters['Priority'].length || props.filters['Priority'].includes(task.priority),
+      !props.filters['Author'].length || props.filters['Author'].includes(task.author),
+    ].every(Boolean);
+  });
+});
+
 function newTaskPopupClose() {
   newTask.value.name = ''
   newTask.value.description = ''
