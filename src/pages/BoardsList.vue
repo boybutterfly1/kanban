@@ -41,7 +41,7 @@
             <td>{{board.id}}</td>
             <td>{{board.owner}}</td>
             <td>
-              <img src="https://img.icons8.com/ios-glyphs/50/000000/more.png" alt="">
+              <img src="https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png" alt="">
             </td>
           </tr>
         </tbody>
@@ -141,26 +141,23 @@ table
     & th
       font-weight: bold
       padding: 10px
-      border-bottom: 1px solid #b7b6b6
+      border-bottom: 1px solid #7e7e7e
       &:nth-child(1)
         width: 20%
   & tbody
     & tr
       cursor: pointer
       &:hover
-        background-color: #d9d9d9
+        background-color: var(--task-hover-background-color)
       & td
         padding: 5px 10px
         & img
           margin-top: 5px
           width: 17px
           margin-left: 10px
-        &:nth-child(1)
-          border-radius: 15px 0 0 15px
         &:nth-child(4)
           width: 10%
           text-align: right
-          border-radius: 0 15px 15px 0
 .new-board
   display: flex
   flex-direction: column
@@ -171,5 +168,5 @@ hr
   width: 100%
   border: 0
   height: 1px
-  background-color: #b7b6b6
+  background-color: #7e7e7e
 </style>

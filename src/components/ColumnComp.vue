@@ -15,15 +15,15 @@
       <div class="column__header">
         <div class="column__header__name">
           <span>{{column.name}}</span>
-          {{column.tasksList.length}}
+          {{filteredSortedSearchedTasks.length}}
         </div>
         <div class="column__header__buttons">
           <img
               @click="newTaskPopupIsOpen = true"
-              src="https://img.icons8.com/ios/50/000000/plus-math--v1.png"
+              src="https://img.icons8.com/ios/50/7e7e7e/plus-math--v1.png"
               alt="add task"
           >
-          <img src="https://img.icons8.com/ios-glyphs/50/000000/more.png" alt="edit column">
+          <img src=https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png alt="edit column">
         </div>
       </div>
       <hr>
@@ -51,7 +51,7 @@
           class="column__add-task-btn"
           @click="newTaskPopupIsOpen = true"
       >
-        <img src="https://img.icons8.com/ios/50/000000/plus-math--v1.png" alt="">
+        <img src="https://img.icons8.com/ios/50/7e7e7e/plus-math--v1.png" alt="">
         Add task
       </button>
     </div>
@@ -213,6 +213,7 @@ onUnmounted(() => {
       & span
         font-weight: bold
     &__buttons
+      padding-top: 5px
       display: inline
       gap: 10px
       & img
@@ -230,6 +231,7 @@ onUnmounted(() => {
     background-color: #d2e2f1
     border-radius: 15px
     margin-bottom: 10px
+    opacity: 0.85
     &__dragover
       background-color: #becdec
     & span
@@ -244,6 +246,7 @@ onUnmounted(() => {
     cursor: pointer
     align-items: center
     font-family: 'Open Sans', sans-serif
+    color: #7e7e7e
     &:hover
       border-radius: 6px
       background-color: #c0c9d0
@@ -259,7 +262,8 @@ onUnmounted(() => {
     font-family: 'Open Sans', sans-serif
     margin-bottom: 10px
     border-radius: 5px
-    border: 1px solid #d9d9d9
+    border: 1px solid #7e7e7e
+    background-color: var(--options-background-color)
     padding: 2px 5px
     &:focus
       outline: none
@@ -269,5 +273,5 @@ hr
   margin-bottom: 10px
   border: 0
   height: 1px
-  background-color: #b7b6b6
+  background-color: #7e7e7e
 </style>

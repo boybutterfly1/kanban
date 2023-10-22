@@ -10,8 +10,15 @@
         <span></span>
         <span></span>
         <label class="switch">
-          <input type="checkbox" id="toggle">
-          <span class="slider"></span>
+          <input
+              type="checkbox"
+              @change="kanbanStore.darkMode = !kanbanStore.darkMode;"
+          >
+          <span class="slider">
+            <img v-if="kanbanStore.darkMode" src="https://img.icons8.com/ios-filled/50/ffffff/sun--v1.png" alt="On Image" class="on-image" />
+            <img v-else src="https://img.icons8.com/ios-filled/50/7e7e7e/crescent-moon.png" alt="Off Image" class="off-image" />
+
+          </span>
         </label>
         <span v-if="usersStore.isLoggedIn">Logout</span>
         <span v-else>Login</span>
@@ -23,7 +30,9 @@
 
 <script setup lang="ts">
 import {useUsersStore} from "@/store/users";
+import {useKanbanStore} from "@/store/kanban";
 
+const kanbanStore = useKanbanStore()
 const usersStore = useUsersStore()
 </script>
 
@@ -33,8 +42,8 @@ const usersStore = useUsersStore()
   width: 100%
   position: fixed
   height: 35px
-  border-bottom: 1px solid #b7b6b6
-  background-color: #f8f8f8
+  border-bottom: 1px solid #7e7e7e
+  background-color: var(--app-background-color)
   align-items: center
   padding: 0 20px
   justify-content: space-between
@@ -55,29 +64,46 @@ const usersStore = useUsersStore()
   display: inline-block
   width: 43px
   height: 22px
-.switch .slider
+  & .slider
+    position: absolute
+    cursor: pointer
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background-color: white
+    transition: .3s
+    border-radius: 25px
+    border: 1px solid #7e7e7e
+  & .slider:before
+    position: absolute
+    content: ""
+    height: 12px
+    width: 12px
+    left: 4px
+    bottom: 4px
+    background-color: #7e7e7e
+    transition: .3s
+    border-radius: 50%
+  & input:checked + .slider
+    background-color: #4c4d50
+  & input:checked + .slider:before
+    transform: translateX(21px)
+
+.on-image
   position: absolute
-  cursor: pointer
-  top: 0
-  left: 0
-  right: 0
-  bottom: 0
-  background-color: white
-  transition: .3s
-  border-radius: 25px
-  border: 1px solid #d9d9d9
-.switch .slider:before
+  height: 16px
+  width: 16px
+  left: 3px
+  bottom: 2px
+  transition: 0.4s
+  border-radius: 50%
+.off-image
   position: absolute
-  content: ""
   height: 12px
   width: 12px
-  left: 4px
+  left: 23px
   bottom: 4px
-  background-color: #d9d9d9
-  transition: .3s
+  transition: 0.4s
   border-radius: 50%
-.switch input:checked + .slider
-  background-color: #a4baec
-.switch input:checked + .slider:before
-  transform: translateX(21px)
 </style>

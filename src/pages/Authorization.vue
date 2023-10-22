@@ -128,10 +128,10 @@ function register(currentUser: User) {
   left: 50%
   transform: translate(-50%, -50%)
   border-radius: 8px
-  border: 1px solid #d9d9d9
+  border: 1px solid var(--task-border-color)
   box-shadow: 5px 5px 10px rgba(0,0,0,0.1)
   padding: 10px
-  background-color: white
+  background-color: var(--task-background-color)
   & form
     display: flex
     flex-direction: column

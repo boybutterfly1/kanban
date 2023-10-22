@@ -33,7 +33,7 @@ const props = defineProps<{
   top: 40%
   left: 50%
   transform: translate(-50%, -50%)
-  background-color: white
+  background-color: var(--task-background-color)
   padding: 15px
   border-radius: 5px
 </style>

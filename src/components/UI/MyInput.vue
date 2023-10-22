@@ -16,11 +16,12 @@ input
   font-family: 'Open Sans', sans-serif
   margin-bottom: 10px
   border-radius: 5px
-  border: 1px solid #d9d9d9
+  border: 1px solid #7e7e7e
   padding: 2px 5px
-  color: #484747
+  color: var(--text-color)
+  background-color: var(--options-background-color)
   &::placeholder
-    color: #484747
+    color: #7e7e7e
   &:focus
     outline: none
     box-shadow: 0 0 5px 1.5px #295bc4

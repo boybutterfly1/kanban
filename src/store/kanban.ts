@@ -6,6 +6,7 @@ import {usePopupsFlagsStore} from "@/store/popupsFlags";
 
 export const useKanbanStore = defineStore('kanban', () => {
   const popupFlagsStore= usePopupsFlagsStore()
+  const darkMode = ref(false)
   const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Testing', 'Closed']
   const priorities: Record<number, string> = {
     0: 'Trivial',
@@ -82,6 +83,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   return {
+    darkMode,
     boards,
     statuses,
     priorities,

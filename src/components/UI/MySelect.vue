@@ -76,8 +76,9 @@ select
   margin-bottom: 10px
   font-family: 'Open Sans', sans-serif
   border-radius: 5px
-  border: 1px solid #d9d9d9
-  color: #484747
+  border: 1px solid #7e7e7e
+  color: #7e7e7e
+  background-color: var(--options-background-color)
   &:focus
     outline: none
 </style>

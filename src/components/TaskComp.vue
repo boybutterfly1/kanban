@@ -11,14 +11,14 @@
   >
     <div class="task__header">
       <div class="popup">
-        <img src="https://img.icons8.com/ios-glyphs/30/000000/user--v1.png" alt="username" class="popup__trigger">
+        <img src="https://img.icons8.com/ios-glyphs/30/7e7e7e/user--v1.png" alt="username" class="popup__trigger">
         <div class="popup__content">
           {{task.author}}
         </div>
       </div>
       <span class="task__header__id">{{task.id}}</span>
       <span>{{task.priority}}</span>
-      <img src="https://img.icons8.com/ios-glyphs/30/000000/more.png" alt="taskDetails">
+      <img src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png" alt="taskDetails">
     </div>
     <span class="task__title">{{task.name}}</span>
     <div class="task__status">
@@ -88,7 +88,7 @@ onBeforeUnmount(() => {
   width: 300px
   height: 110px
   border-radius: 15px
-  border: 1px solid #d9d9d9
+  border: 1px solid var(--task-border-color)
   display: flex
   flex-direction: column
   justify-content: space-between
@@ -96,6 +96,7 @@ onBeforeUnmount(() => {
   transition: 0.3s ease
   padding: 15px
   cursor: grab
+  background-color: var(--task-background-color)
   &__isGrabbed
     cursor: grabbing
   &__header
@@ -111,14 +112,17 @@ onBeforeUnmount(() => {
         background-color: #a7adb2
     &__id
       width: 120px
+      color: #7e7e7e
     & span
       font-size: 12px
+      color: #7e7e7e
   &__details-open
     background-color: #ddeaf6
   &__details-closed
-    background-color: white
+    background-color: var(--task-background-color)
   &:hover
-    background-color: gainsboro
+    background-color: var(--task-hover-background-color)
+    border-color: var(--task-hover-background-color)
   &__title
     font-size: 14px
   &__status
