@@ -12,7 +12,6 @@
               type="text"
               placeholder="Search by board"
           />
-          <div>Sort by</div>
         </div>
         <div class="boards__header__bar__button>">
           <my-button @click="popupFlagsStore.createBoardPopupIsOpen = true">
@@ -78,7 +77,7 @@ import MyPopup from "@/components/UI/MyPopup.vue";
 import {Board} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
-import Loading from "@/components/UI/Loading.vue";
+import MySelect from "@/components/UI/MySelect.vue";
 const popupFlagsStore = usePopupsFlagsStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()

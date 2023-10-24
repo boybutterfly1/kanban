@@ -1,7 +1,7 @@
 <template>
   <div
       class="auth"
-      v-if="!kanbanStore.loading"
+      v-if="!kanbanStore.isLoading"
   >
       <form
         @submit.prevent
@@ -105,10 +105,10 @@ function login(currentUser: User) {
   if (user) {
     usersStore.currentUser = user;
     usersStore.isLoggedIn = true;
-    kanbanStore.loading = true
+    kanbanStore.isLoading = true
     setTimeout(() => {
       router.push('/');
-      kanbanStore.loading = false
+      kanbanStore.isLoading = false
     }, 800);
   }
 }

@@ -5,7 +5,6 @@ import router from "@/router";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
 
 export const useKanbanStore = defineStore('kanban', () => {
-  const popupFlagsStore= usePopupsFlagsStore()
   const darkMode = ref(false)
   const statuses: string[] = ['Open', 'In Progress', 'Need Info', 'Testing', 'Closed']
   const priorities: Record<number, string> = {
@@ -26,7 +25,7 @@ export const useKanbanStore = defineStore('kanban', () => {
         statuses: ['Open'],
         tasksList: [{
           id: 1,
-          name: '1',
+          name: 'First task',
           description: null,
           status: 'Open',
           startDate: '00.00.00',
@@ -35,7 +34,7 @@ export const useKanbanStore = defineStore('kanban', () => {
           columnId: 1
         },{
           id: 2,
-          name: '2',
+          name: 'Second task',
           description: null,
           status: 'Open',
           startDate: '00.00.00',
@@ -51,7 +50,7 @@ export const useKanbanStore = defineStore('kanban', () => {
           statuses: ['In Progress', 'Need Info'],
           tasksList: [{
             id: 3,
-            name: '3',
+            name: 'Third task',
             description: null,
             status: 'In Progress',
             startDate: '00.00.00',
@@ -65,7 +64,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     },
   ])
   const searchValue = ref<string>('')
-  const loading = ref<boolean>(false)
+  const isLoading = ref<boolean>(false)
 
   const searchTasks = computed<Task[]>((array: Task[]) => {
     return array.filter((task: Task) => task.name.toLowerCase().includes(searchValue.value.toLowerCase()))
@@ -73,12 +72,13 @@ export const useKanbanStore = defineStore('kanban', () => {
   const searchBoards = computed<Board[]>((array: Board[]) => {
     return array.filter((board: Board) => board.name.toLowerCase().includes(searchValue.value.toLowerCase()))
   })
+  const selectedTasks = ref<Task[]>([])
 
   function changePage(route: string) {
     router.push(route);
-    loading.value = true
+    isLoading.value = true
     setTimeout(() => {
-      loading.value = false
+      isLoading.value = false
     }, 2500);
   }
 
@@ -90,7 +90,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     searchValue,
     searchTasks,
     searchBoards,
-    loading,
+    selectedTasks,
+    isLoading,
     changePage
   }
 })

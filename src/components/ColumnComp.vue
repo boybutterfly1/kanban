@@ -28,10 +28,10 @@
       </div>
       <hr>
       <task-comp
-          v-for="(task,index) in filteredSortedSearchedTasks"
+          v-for="(task) in filteredSortedSearchedTasks"
           :key="task.id"
           :task="task"
-          :taskIndex="index"
+          :column="column"
       />
       <div v-if="isDropArea">
         <div v-for="status in column.statuses">
@@ -205,6 +205,8 @@ onUnmounted(() => {
   width: 300px
   gap: 10px
   margin-right: 30px
+  margin-bottom: 20px
+  padding: 0 7px
   &__header
     display: flex
     align-items: center
@@ -254,6 +256,7 @@ onUnmounted(() => {
       width: 17px
       margin-right: 2px
 .new-task
+  padding: 15px
   display: flex
   flex-direction: column
   textarea

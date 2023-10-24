@@ -46,6 +46,7 @@ watch(() => kanbanStore.darkMode, () => {
   margin: 0
   padding: 0
   box-sizing: border-box
+  overscroll-behavior: none
 .app
   font-family: 'Open Sans', sans-serif
   background-color: var(--app-background-color)

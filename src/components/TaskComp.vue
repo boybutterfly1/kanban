@@ -2,9 +2,12 @@
   <div
       v-if="task"
       class="task"
-      @click.stop
-      @click="toggleTaskDetails"
-      :class="{'task__details-open': taskDetailsIsOpen, 'task__details-closed' : !taskDetailsIsOpen, 'task__isGrabbed':taskDADStore.isGrabbed}"
+      @click.stop="taskDetailsIsOpen = true"
+      :class="{
+        'task__details-open': taskDetailsIsOpen,
+        'task__isGrabbed':taskDADStore.isGrabbed,
+        'task__isSelected' : isSelected
+      }"
       draggable="true"
       @dragstart="taskDADStore.onDrag($event, task)"
       @dragend="taskDADStore.isDroppableArea = false"
@@ -18,7 +21,13 @@
       </div>
       <span class="task__header__id">{{task.id}}</span>
       <span>{{task.priority}}</span>
-      <img src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png" alt="taskDetails">
+      <img
+          class="edit-task"
+          src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png"
+          alt="taskDetails"
+          :id="task.id + 'edit'"
+          @click.stop="openEditTaskPopup"
+      >
     </div>
     <span class="task__title">{{task.name}}</span>
     <div class="task__status">
@@ -34,53 +43,137 @@
       class="side-menu"
   >
     {{task.name}}
+    <my-popup
+        :is-open="isEditTaskPopupOpen"
+        @close="isEditTaskPopupOpen = false"
+        :coordinates="editTaskPopupCoordinates"
+    >
+      <div class="task-options-container">
+        <div
+            v-if="kanbanStore.darkMode"
+            class="task-options-container__options"
+        >
+          <div
+              v-if="!isSelected"
+              @click="selectTask"
+          >
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/checked-checkbox--v1.png" alt="select">
+            <span>Select</span>
+          </div>
+          <div
+              v-else
+              @click="unselectTask"
+          >
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/indeterminate-checkbox.png" alt="select">
+            <span>Clear</span>
+          </div>
+          <div @click="deleteTask">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/trash--v1.png" alt="trash">
+            <span>Delete task</span>
+          </div>
+        </div>
+        <div
+            v-else
+            class="task-options-container__options"
+        >
+          <div
+              v-if="!isSelected"
+              @click="selectTask"
+          >
+            <img src="https://img.icons8.com/ios-filled/50/checked-checkbox--v1.png" alt="select">
+            <span>Select</span>
+          </div>
+          <div
+              v-else
+              @click="unselectTask"
+          >
+            <img src="https://img.icons8.com/ios-filled/50/indeterminate-checkbox.png" alt="select">
+            <span>Clear</span>
+          </div>
+          <div @click="deleteTask">
+            <img src="https://img.icons8.com/ios-filled/50/trash--v1.png" alt="trash">
+            <span>Delete task</span>
+          </div>
+        </div>
+      </div>
+    </my-popup>
   </div>
+
 </template>
 
 <script setup lang="ts">
-import {Task} from "@/types/types";
+import {Column, Task} from "@/types/types";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
-import {onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import MyPopup from "@/components/UI/MyPopup.vue";
+import {useKanbanStore} from "@/store/kanban";
 
+const kanbanStore = useKanbanStore()
 const taskDADStore = useTaskDragAndDropStore()
 const props = defineProps<{
   task: Task,
-  taskIndex: number
+  column: Column
 }>()
-const emits = defineEmits(['dragEnd','dragStart'])
 
 const taskDetailsIsOpen = ref<boolean>(false)
 const taskElement = ref<HTMLElement | null>(null);
 const elementToHide = ref<HTMLElement | null>(null);
-const taskDetailsOpen = ref<number>(-1)
+const isEditTaskPopupOpen = ref(false)
+const editTaskPopupCoordinates = ref<Record<string, number | null>>({
+  top: null,
+  left: null
+})
+const isSelected = computed<boolean>(() => {
+  return kanbanStore.selectedTasks.includes(props.task)
+})
+
 function getStatusClass(status: string): string {
   return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
-const toggleTaskDetails = () => {
-  // Закрываем детали предыдущей задачи, если они открыты
-  if (taskDetailsOpen.value !== -1) {
-    taskDetailsOpen.value = -1;
-  }
+function openEditTaskPopup() {
+  const element = document.getElementById(String(props.task.id) + 'edit')
+  const rect = element? element.getBoundingClientRect() : null
+  editTaskPopupCoordinates.value['top'] = rect? rect.top + rect.height : null
+  editTaskPopupCoordinates.value['left'] = rect? rect.left : null
 
-  // Открываем/закрываем детали текущей задачи
-  taskDetailsOpen.value = taskDetailsOpen.value === props.taskIndex ? -1 : props.taskIndex;
-};
-
-const handleClickOutside = (event: MouseEvent) => {
+  isEditTaskPopupOpen.value = true
+}
+function selectTask() {
+  isEditTaskPopupOpen.value = false
+  kanbanStore.selectedTasks.push(props.task)
+}
+function unselectTask() {
+  isEditTaskPopupOpen.value = false
+  kanbanStore.selectedTasks = kanbanStore.selectedTasks.filter((task: Task) => {
+    return task.id !== props.task.id
+  })
+}
+function deleteTask() {
+  props.column.tasksList = props.column.tasksList.filter((task: Task) => {
+    return task.id !== props.task.id
+  })
+}
+function handleClickOutside(event: MouseEvent) {
   if (elementToHide.value && !elementToHide.value.contains(event.target as Node)) {
     taskDetailsIsOpen.value = false;
   }
-};
-
+}
+function handleScroll() {
+  taskDetailsIsOpen.value = false
+  isEditTaskPopupOpen.value = false
+  console.log('scroll')
+}
 onMounted(() => {
   elementToHide.value = document.querySelector('.side-menu');
   taskElement.value = document.querySelector('.task');
   document.addEventListener('click', handleClickOutside);
-});
-
+  window.addEventListener("scroll", handleScroll);
+})
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
-});
+  window.removeEventListener("scroll", handleScroll);
+})
+
 </script>
 
 <style lang="sass" scoped>
@@ -99,6 +192,8 @@ onBeforeUnmount(() => {
   background-color: var(--task-background-color)
   &__isGrabbed
     cursor: grabbing
+  &__isSelected
+    box-shadow: 0 0 5px 1.5px #295bc4
   &__header
     display: flex
     align-items: center
@@ -173,8 +268,33 @@ onBeforeUnmount(() => {
   top: 0
   right: -500px
   background: white
-  transition: right 0.5s
+  transition: right 0.3s
   overflow-y: auto
+  z-index: 100
 .menu-open
   right: 0
+.selected-tasks
+  padding: 0 40px
+  position: fixed
+  bottom: 60px
+  height: 60px
+  width: 100%
+  border-radius: 10px
+  background-color: #3f74e3
+.task-options-container
+  &__options
+    padding: 3px 0
+    display: flex
+    flex-direction: column
+    cursor: pointer
+    font-size: 12px
+    & div
+      display: flex
+      align-items: center
+      padding: 5px 10px
+      & img
+        width: 15px
+        margin-right: 3px
+      &:hover
+        background-color: var(--task-hover-background-color)
 </style>
