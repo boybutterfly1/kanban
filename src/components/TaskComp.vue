@@ -19,13 +19,26 @@
           {{task.author}}
         </div>
       </div>
-      <span class="task__header__id">{{task.id}}</span>
+      <div class="popup">
+        <div class="popup__trigger">
+          <span
+              @mouseover="isIDCopied = false"
+              @click.stop="copyId"
+              class="task__header__id"
+          >
+            {{task.id}}
+          </span>
+        </div>
+        <div class="popup__content">
+          {{ copyStatus }}
+        </div>
+      </div>
       <span>{{task.priority}}</span>
       <img
           class="edit-task"
           src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png"
           alt="taskDetails"
-          :id="task.id + 'edit'"
+          :id="task.id + 'edit-task'"
           @click.stop="openEditTaskPopup"
       >
     </div>
@@ -34,7 +47,7 @@
       <div
           :class="getStatusClass(task.status)"
       >
-        {{task.status}}
+        {{`${task.status}: ${timer}`}}
       </div>
     </div>
   </div>
@@ -43,60 +56,40 @@
       class="side-menu"
   >
     {{task.name}}
-    <my-popup
+    <my-dropdown
         :is-open="isEditTaskPopupOpen"
         @close="isEditTaskPopupOpen = false"
         :coordinates="editTaskPopupCoordinates"
+        :dropdownId="String(task.id) + 'edit-task'"
     >
       <div class="task-options-container">
         <div
-            v-if="kanbanStore.darkMode"
             class="task-options-container__options"
         >
           <div
               v-if="!isSelected"
               @click="selectTask"
           >
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/checked-checkbox--v1.png" alt="select">
+            <img v-if="kanbanStore.darkMode" src="https://img.icons8.com/ios-filled/50/ffffff/checked-checkbox--v1.png" alt="select">
+            <img v-else src="https://img.icons8.com/ios-filled/50/000000/checked-checkbox--v1.png" alt="select">
             <span>Select</span>
           </div>
           <div
               v-else
               @click="unselectTask"
           >
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/indeterminate-checkbox.png" alt="select">
+            <img v-if="kanbanStore.darkMode" src="https://img.icons8.com/ios-filled/50/indeterminate-checkbox.png" alt="select">
+            <img v-else src="https://img.icons8.com/ios-filled/50/indeterminate-checkbox.png" alt="select">
             <span>Clear</span>
           </div>
-          <div @click="deleteTask">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/trash--v1.png" alt="trash">
-            <span>Delete task</span>
-          </div>
-        </div>
-        <div
-            v-else
-            class="task-options-container__options"
-        >
-          <div
-              v-if="!isSelected"
-              @click="selectTask"
-          >
-            <img src="https://img.icons8.com/ios-filled/50/checked-checkbox--v1.png" alt="select">
-            <span>Select</span>
-          </div>
-          <div
-              v-else
-              @click="unselectTask"
-          >
-            <img src="https://img.icons8.com/ios-filled/50/indeterminate-checkbox.png" alt="select">
-            <span>Clear</span>
-          </div>
-          <div @click="deleteTask">
-            <img src="https://img.icons8.com/ios-filled/50/trash--v1.png" alt="trash">
+          <div class="delete"
+               @click="deleteTask">
+            <img src="https://img.icons8.com/ios-filled/50/ff4747/trash--v1.png" alt="trash">
             <span>Delete task</span>
           </div>
         </div>
       </div>
-    </my-popup>
+    </my-dropdown>
   </div>
 
 </template>
@@ -107,6 +100,7 @@ import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import {useKanbanStore} from "@/store/kanban";
+import MyDropdown from "@/components/UI/MyDropdown.vue";
 
 const kanbanStore = useKanbanStore()
 const taskDADStore = useTaskDragAndDropStore()
@@ -119,6 +113,11 @@ const taskDetailsIsOpen = ref<boolean>(false)
 const taskElement = ref<HTMLElement | null>(null);
 const elementToHide = ref<HTMLElement | null>(null);
 const isEditTaskPopupOpen = ref(false)
+const isIDCopied = ref(false)
+
+const copyStatus = computed<string>(() => {
+  return isIDCopied.value ? 'Copied' : 'Copy'
+})
 const editTaskPopupCoordinates = ref<Record<string, number | null>>({
   top: null,
   left: null
@@ -126,16 +125,39 @@ const editTaskPopupCoordinates = ref<Record<string, number | null>>({
 const isSelected = computed<boolean>(() => {
   return kanbanStore.selectedTasks.includes(props.task)
 })
+const timer = computed<string>(() => {
+  let time: number
+  if (props.task.statusChangeDate) {
+    time = Date.now() - props.task.statusChangeDate;
+  } else {
+    time = props.task.startDate ? Date.now() - props.task.startDate : 0;
+  }
+  const date = new Date(time)
+  const days = Math.floor(time / (24 * 60 * 60 * 1000));
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  return days ? `${days}d ${hours}hr ${minutes}m`: `${hours}hr ${minutes}m`
+})
+function copyId() {
+  navigator.clipboard.writeText(String(props.task.id))
+      .then(() => {
+        isIDCopied.value = true
+      })
+      .catch(error => {
+        console.error(error);
+      });
 
+}
 function getStatusClass(status: string): string {
   return ['task__status', status.toLowerCase().replace(' ', '-')].join(' ')
 }
 function openEditTaskPopup() {
-  const element = document.getElementById(String(props.task.id) + 'edit')
+  const element = document.getElementById(String(props.task.id) + 'edit-task')
   const rect = element? element.getBoundingClientRect() : null
   editTaskPopupCoordinates.value['top'] = rect? rect.top + rect.height : null
   editTaskPopupCoordinates.value['left'] = rect? rect.left : null
-
+  kanbanStore.openDropdowns.push(String(props.task.id) + 'edit-task')
+  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
   isEditTaskPopupOpen.value = true
 }
 function selectTask() {
@@ -161,7 +183,6 @@ function handleClickOutside(event: MouseEvent) {
 function handleScroll() {
   taskDetailsIsOpen.value = false
   isEditTaskPopupOpen.value = false
-  console.log('scroll')
 }
 onMounted(() => {
   elementToHide.value = document.querySelector('.side-menu');
@@ -208,6 +229,7 @@ onBeforeUnmount(() => {
     &__id
       width: 120px
       color: #7e7e7e
+      display: flex
     & span
       font-size: 12px
       color: #7e7e7e
@@ -253,11 +275,11 @@ onBeforeUnmount(() => {
     top: 100%
     left: 0
     color: gainsboro
-    background-color: #505050
-    border: 1px solid #ddd
+    background-color: #484848
     border-radius: 5px
-    padding: 2px
+    padding: 5px 5px
     font-size: 12px
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.5)
   &__trigger:hover + &__content
     display: block
 .side-menu
@@ -273,14 +295,6 @@ onBeforeUnmount(() => {
   z-index: 100
 .menu-open
   right: 0
-.selected-tasks
-  padding: 0 40px
-  position: fixed
-  bottom: 60px
-  height: 60px
-  width: 100%
-  border-radius: 10px
-  background-color: #3f74e3
 .task-options-container
   &__options
     padding: 3px 0
@@ -288,6 +302,8 @@ onBeforeUnmount(() => {
     flex-direction: column
     cursor: pointer
     font-size: 12px
+    & .delete
+      color: #ff4747
     & div
       display: flex
       align-items: center

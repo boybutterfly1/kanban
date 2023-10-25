@@ -24,45 +24,44 @@ export const useKanbanStore = defineStore('kanban', () => {
         name: 'Open',
         statuses: ['Open'],
         tasksList: [{
-          id: 1,
+          id: 'Task-1',
           name: 'First task',
           description: null,
           status: 'Open',
-          startDate: '00.00.00',
+          startDate: 1697662800000,
           priority: 'Minor',
           author: 'Admin',
           columnId: 1
         },{
-          id: 2,
+          id: 'Task-2',
           name: 'Second task',
           description: null,
           status: 'Open',
-          startDate: '00.00.00',
+          startDate: 1697922000000,
           priority: 'Trivial',
           author: 'Admin',
           columnId: 1
         }],
-        boardId: 1
       },
         {
           id: 2,
           name: 'In Progress, Need Info',
           statuses: ['In Progress', 'Need Info'],
           tasksList: [{
-            id: 3,
+            id: 'Task-3',
             name: 'Third task',
             description: null,
             status: 'In Progress',
-            startDate: '00.00.00',
+            startDate: 1698181200000,
             priority: 'Minor',
             author: 'Admin',
             columnId: 2
           },],
-          boardId: 1
         }],
       availableStatuses: ['Testing', 'Closed']
     },
-  ])
+  ]);
+  const openDropdowns = ref<string[]>([])
   const searchValue = ref<string>('')
   const isLoading = ref<boolean>(false)
 
@@ -75,7 +74,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   const selectedTasks = ref<Task[]>([])
 
   function changePage(route: string) {
-    router.push(route);
+    router.push(route).then(r => {})
     isLoading.value = true
     setTimeout(() => {
       isLoading.value = false
@@ -92,6 +91,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     searchBoards,
     selectedTasks,
     isLoading,
+    openDropdowns,
     changePage
   }
 })

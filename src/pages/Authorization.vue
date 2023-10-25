@@ -107,17 +107,19 @@ function login(currentUser: User) {
     usersStore.isLoggedIn = true;
     kanbanStore.isLoading = true
     setTimeout(() => {
-      router.push('/');
+      router.push('/boards');
       kanbanStore.isLoading = false
     }, 800);
   }
 }
 
 function register(currentUser: User) {
-  usersStore.users.push(currentUser)
-  usersStore.currentUser = currentUser;
-  usersStore.isLoggedIn = true;
-  kanbanStore.changePage('/')
+  if (isPasswordValid.value) {
+    usersStore.users.push(currentUser)
+    usersStore.currentUser = currentUser;
+    usersStore.isLoggedIn = true;
+    kanbanStore.changePage('/boards')
+  }
 }
 </script>
 

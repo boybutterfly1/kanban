@@ -34,7 +34,7 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
       if (dropColumn.statuses.length === 1) {
         dragTask.value.status = dropColumn.statuses[0]
       }
-      dragTask.value.statusChangeDate = Date.now().toLocaleString()
+      dragTask.value.statusChangeDate = Date.now()
       dropColumn.tasksList.push({...dragTask.value})
     }
   }

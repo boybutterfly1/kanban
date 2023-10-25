@@ -177,6 +177,15 @@
           </div>
         </my-popup>
       </div>
+      <div
+          class="board__empty-board"
+          v-if="!props.board.columns.length"
+      >
+        <span>No tasks found</span>
+        <my-button @click="popupsFlagsStore.newColumnPopupIsOpen = true">
+          Add column
+        </my-button>
+      </div>
     </div>
 
     <div v-else class="board-skeleton">
@@ -251,7 +260,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -275,8 +283,7 @@ const newColumn = ref<Column>({
   id: null,
   name: '',
   statuses : [],
-  tasksList: [],
-  boardId: props.board.id
+  tasksList: []
 })
 const isFilterPopupOpen = ref(false)
 const isShowFilters = ref(false)
@@ -401,10 +408,24 @@ function changeStatus() {
 
 <style lang="sass" scoped>
 .board
-  padding: 55px 40px
+  padding: 65px 60px
   display: flex
   flex-direction: column
   overflow: scroll
+  &__empty-board
+    margin-top: 50px
+    padding: 50px
+    align-self: center
+    width: 500px
+    border-radius: 15px
+    border: 1px solid var(--task-border-color)
+    box-shadow: 5px 10px 10px rgba(0,0,0,0.1)
+    background-color: var(--task-background-color)
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 20px
+    justify-content: center
   &__header
     display: flex
     justify-content: space-between
@@ -576,7 +597,7 @@ function changeStatus() {
         background-color: #a7adb2
 
 .board-skeleton
-  padding: 55px 40px
+  padding: 65px 40px
   display: flex
   flex-direction: column
   &__header

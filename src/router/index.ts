@@ -5,12 +5,12 @@ import Authorization from "@/pages/Authorization.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
+    path: '/boards',
     name: 'boards',
     component: BoardsList
   },
   {
-    path: '/board:id',
+    path: '/board/:id',
     name: 'currentBoard',
     component: CurrentBoard
   },

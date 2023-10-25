@@ -10,16 +10,15 @@ export interface Column {
   name: string
   statuses : string[]
   tasksList: Task[]
-  boardId: number | null
 }
 export interface Task {
-  id: number | null
+  id: string | null
   name: string
   description: string | null
   status: string
-  statusChangeDate?: string
-  startDate: string
-  deadlineDate?: string
+  statusChangeDate?: number | null
+  startDate: number | null
+  deadlineDate?: number | null
   priority: keyof typeof Priorities
   author: string
   columnId: number | null

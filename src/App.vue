@@ -1,6 +1,5 @@
 <template>
   <div class="app">
-<!--    <navbar v-if="route.path !== '/authorization'"/>-->
     <navbar/>
     <router-view/>
   </div>
@@ -8,12 +7,13 @@
 
 <script setup lang="ts">
 import Navbar from "@/components/Navbar.vue";
-import {useRoute} from "vue-router";
 import {useKanbanStore} from "@/store/kanban";
-import {watch} from "vue";
+import {onMounted, watch} from "vue";
+import router from "@/router";
+import {useUsersStore} from "@/store/users";
 
+const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
-const route = useRoute()
 
 watch(() => kanbanStore.darkMode, () => {
   if (kanbanStore.darkMode === true) {
@@ -37,6 +37,11 @@ watch(() => kanbanStore.darkMode, () => {
     document.documentElement.style.setProperty('--text-color', 'black');
     document.documentElement.style.setProperty('--linear-gradient', 'linear-gradient(90deg, #b0b0b0, #e8e8e8, #b0b0b0)');
 
+  }
+})
+onMounted(() => {
+  if (!usersStore.isLoggedIn) {
+    router.push('/authorization')
   }
 })
 </script>

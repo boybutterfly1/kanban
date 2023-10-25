@@ -21,7 +21,3 @@ button
   &:hover
     background-color: #2953ab
 </style>
-
-
-
-

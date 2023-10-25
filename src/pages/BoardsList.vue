@@ -34,19 +34,40 @@
           <tr
               class="list"
               v-for="board in searchBoards"
-              @click="kanbanStore.changePage(`/board${board.id}`)"
           >
-            <td>{{board.name}}</td>
-            <td>{{board.id}}</td>
-            <td>{{board.owner}}</td>
+            <td @click.stop="kanbanStore.changePage(`/board/${board.id}`)">{{board.name}}</td>
+            <td @click.stop="kanbanStore.changePage(`/board/${board.id}`)">{{board.id}}</td>
+            <td @click.stop="kanbanStore.changePage(`/board/${board.id}`)">{{board.owner}}</td>
             <td>
-              <img src="https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png" alt="">
+              <img
+                  @click.stop="openBoardDropdown(board.id)"
+                  src="https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png"
+                  alt="dropdown"
+                  :id="board.id + 'edit-board'"
+              >
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
+  <my-dropdown
+      :dropdown-id="String(currentBoardId) + 'edit-column'"
+      :is-open="isBoardDropdownOpen"
+      :coordinates="boardDropdownCoordinates"
+      @close="isBoardDropdownOpen = false"
+      direction="left"
+  >
+    <div class="board-options-container">
+      <div class="board-options-container__options">
+        <div class="delete"
+             @click="deleteBoard(currentBoardId)">
+          <img src="https://img.icons8.com/ios-filled/50/ff4747/trash--v1.png" alt="trash">
+          <span>Delete board</span>
+        </div>
+      </div>
+    </div>
+  </my-dropdown>
   <my-popup
       :is-open="popupFlagsStore.createBoardPopupIsOpen"
       @close="createBoardPopupClose"
@@ -77,7 +98,7 @@ import MyPopup from "@/components/UI/MyPopup.vue";
 import {Board} from "@/types/types";
 import {useUsersStore} from "@/store/users";
 import {usePopupsFlagsStore} from "@/store/popupsFlags";
-import MySelect from "@/components/UI/MySelect.vue";
+import MyDropdown from "@/components/UI/MyDropdown.vue";
 const popupFlagsStore = usePopupsFlagsStore()
 const usersStore = useUsersStore()
 const kanbanStore = useKanbanStore()
@@ -88,15 +109,37 @@ const newBoard = ref<Board>({
   columns: [],
   availableStatuses : [...kanbanStore.statuses]
 })
+const currentBoardId = ref<number | null>(null)
+const boardDropdownCoordinates = ref<Record<string, number | null>>({
+  top: null,
+  left: null
+})
+const isBoardDropdownOpen = ref(false)
 const searchBoards = computed<Board[]>(() => {
   return kanbanStore.boards.filter((board: Board) => board.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
 })
+function openBoardDropdown(id: number| null) {
+  currentBoardId.value = id
+  const element = document.getElementById(String(id) + 'edit-board')
+  const rect = element? element.getBoundingClientRect() : null
+  boardDropdownCoordinates.value['top'] = rect? rect.top + rect.height  : null
+  boardDropdownCoordinates.value['left'] = rect? rect.left + rect.width: null
+  kanbanStore.openDropdowns.push(String(id) + 'edit-board')
+  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
+  isBoardDropdownOpen.value = true
+}
+function deleteBoard(id: number | null) {
+  kanbanStore.boards = kanbanStore.boards.filter((board: Board) => {
+    return board.id !== id
+  })
+  isBoardDropdownOpen.value = false
+}
 function createBoard() {
   if (newBoard.value.name) {
     newBoard.value.id = Date.now()
     kanbanStore.boards.push({...newBoard.value})
     popupFlagsStore.createBoardPopupIsOpen = false
-    kanbanStore.changePage(`/board${newBoard.value.id}`)
+    kanbanStore.changePage(`/board/${newBoard.value.id}`)
     createBoardPopupClose()
   }
 }
@@ -112,7 +155,7 @@ onUnmounted(() => {
 <style lang="sass" scoped>
 .boards
   display: flex
-  padding: 55px 40px
+  padding: 65px 60px
   flex-direction: column
   &__header
     display: flex
@@ -128,8 +171,6 @@ onUnmounted(() => {
       &__options
         display: flex
         justify-content: space-between
-        & div
-          margin-left: 20px
 table
   margin-top: 10px
   border-collapse: collapse
@@ -151,9 +192,7 @@ table
       & td
         padding: 5px 10px
         & img
-          margin-top: 5px
           width: 17px
-          margin-left: 10px
         &:nth-child(4)
           width: 10%
           text-align: right
@@ -161,8 +200,27 @@ table
   display: flex
   flex-direction: column
   justify-content: center
+  padding: 15px
   & span
     margin-bottom: 15px
+.board-options-container
+  &__options
+    padding: 3px 0
+    display: flex
+    flex-direction: column
+    cursor: pointer
+    font-size: 12px
+    & .delete
+      color: #ff4747
+    & div
+      display: flex
+      align-items: center
+      padding: 5px 10px
+      & img
+        width: 15px
+        margin-right: 3px
+      &:hover
+        background-color: var(--task-hover-background-color)
 hr
   width: 100%
   border: 0

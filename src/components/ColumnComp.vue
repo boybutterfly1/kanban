@@ -19,11 +19,16 @@
         </div>
         <div class="column__header__buttons">
           <img
-              @click="newTaskPopupIsOpen = true"
+              @click="isNewTaskPopupOpen = true"
               src="https://img.icons8.com/ios/50/7e7e7e/plus-math--v1.png"
               alt="add task"
           >
-          <img src=https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png alt="edit column">
+          <img
+              src=https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png
+              alt="edit column"
+              :id="column.id + 'edit-column'"
+              @click.stop="openColumnDropdown"
+          >
         </div>
       </div>
       <hr>
@@ -49,7 +54,7 @@
       <button
           v-if="column.id === board.columns[0].id"
           class="column__add-task-btn"
-          @click="newTaskPopupIsOpen = true"
+          @click="isNewTaskPopupOpen = true"
       >
         <img src="https://img.icons8.com/ios/50/7e7e7e/plus-math--v1.png" alt="">
         Add task
@@ -57,7 +62,7 @@
     </div>
   </div>
   <my-popup
-      :is-open="newTaskPopupIsOpen"
+      :is-open="isNewTaskPopupOpen"
       @close="newTaskPopupClose"
   >
     <form class="new-task" @submit.prevent>
@@ -94,6 +99,22 @@
       </my-button>
     </form>
   </my-popup>
+  <my-dropdown
+      :is-open="isColumnDropdownOpen"
+      @close="isColumnDropdownOpen = false"
+      :coordinates="columnDropdownCoordinates"
+      :dropdownId="String(column.id) + 'edit-column'"
+  >
+    <div class="column-options-container">
+      <div class="column-options-container__options">
+        <div class="delete"
+             @click="deleteColumn">
+          <img src="https://img.icons8.com/ios-filled/50/ff4747/trash--v1.png" alt="trash">
+          <span>Delete column</span>
+        </div>
+      </div>
+    </div>
+  </my-dropdown>
 </template>
 
 <script setup lang="ts">
@@ -108,6 +129,7 @@ import MySelect from "@/components/UI/MySelect.vue";
 import MyInput from "@/components/UI/MyInput.vue";
 import {useTaskDragAndDropStore} from "@/store/taskDragAndDrop";
 import {useColumnDragAndDropStore} from "@/store/columnDragAndDrop";
+import MyDropdown from "@/components/UI/MyDropdown.vue";
 const taskDADStore = useTaskDragAndDropStore()
 const columnDADStore = useColumnDragAndDropStore()
 const usersStore = useUsersStore()
@@ -123,12 +145,18 @@ const newTask = ref<Task>({
   name: '',
   description: '',
   status: '',
-  startDate: '',
+  startDate: null,
   priority: '',
   author: usersStore.currentUser? usersStore.currentUser.username : '',
   columnId: props.column.id
 })
-const newTaskPopupIsOpen = ref<boolean>(false)
+const columnDropdownCoordinates = ref<Record<string, number | null>>({
+  top: null,
+  left: null
+})
+
+const isColumnDropdownOpen = ref(false)
+const isNewTaskPopupOpen = ref(false)
 const isDragOver = ref<Record<string, boolean>>({})
 const setDragOver = (status: string, value: boolean) => {
   isDragOver.value[status] = value;
@@ -136,6 +164,21 @@ const setDragOver = (status: string, value: boolean) => {
 const isDropArea = computed<boolean>(() => {
   return  isColumnNameNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea
 })
+function openColumnDropdown() {
+  const element = document.getElementById(String(props.column.id) + 'edit-column')
+  const rect = element? element.getBoundingClientRect() : null
+  columnDropdownCoordinates.value['top'] = rect? rect.top + rect.height  : null
+  columnDropdownCoordinates.value['left'] = rect? rect.left : null
+  kanbanStore.openDropdowns.push(String(props.column.id) + 'edit-column')
+  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
+  isColumnDropdownOpen.value = true
+}
+function deleteColumn() {
+  props.board.columns = props.board.columns.filter((column: Column) => {
+    return column.id !== props.column.id
+  })
+  props.board.availableStatuses = [...props.board.availableStatuses, ...props.column.statuses]
+}
 function isColumnNameNotOpen(): boolean {
   return !props.column.statuses.some((status: string) => status === 'Open')
 }
@@ -143,7 +186,9 @@ function isDragColNotDropCol():boolean {
   return taskDADStore.dragTask ? taskDADStore.dragTask.columnId !== props.column.id : false
 }
 const searchedTasks = computed<Task[]>(() => {
-  return props.column.tasksList.filter((task: Task) => task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
+  return props.column.tasksList.filter((task: Task) => {
+    return task.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()) || String(task.id).includes(kanbanStore.searchValue)
+  })
 })
 const sortedSearchedTasks = computed<Task[]>(() => {
   const values: Record<string, Task[]> = {
@@ -151,10 +196,10 @@ const sortedSearchedTasks = computed<Task[]>(() => {
       return Priorities[task1.priority] - Priorities[task2.priority];
     }).reverse(),
     'Start Date' : [...searchedTasks.value].sort((task1: Task, task2: Task) => {
-      return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
-    }).reverse(),
-    'Deadline' : [...searchedTasks.value.filter((task: Task) => {task.deadlineDate})].sort((task1: Task, task2: Task) => {
-      return new Date(task1.startDate).getTime() - new Date(task2.startDate).getTime();
+      return (task1.startDate && task2.startDate) ? (task1.startDate) - (task2.startDate) : 0;
+    }),
+    'Deadline' : [...searchedTasks.value].sort((task1: Task, task2: Task) => {
+      return (task1.deadlineDate && task2.deadlineDate) ? (task1.deadlineDate) - (task2.deadlineDate) : 0;
     }).reverse(),
   }
   return values[props.sortValue] || searchedTasks.value
@@ -174,20 +219,24 @@ function newTaskPopupClose() {
   newTask.value.description = ''
   newTask.value.status = ''
   newTask.value.priority = ''
-  newTaskPopupIsOpen.value = false
+  isNewTaskPopupOpen.value = false
+}
+function generateID() {
+  let sum = 0
+  props.board.columns.forEach((column: Column) => sum+=column.tasksList.length)
+  return sum + 1
 }
 function addNewTask() {
   if (newTask.value.name && newTask.value.status && newTask.value.priority) {
-    newTask.value.id = Date.now()
-    newTask.value.startDate = new Date().toLocaleString()
-    console.log(newTask.value.startDate)
+    newTask.value.id = `Task-${generateID()}`
+    newTask.value.startDate = Date.now()
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
   }
   if (newTask.value.name && newTask.value.priority && props.column.statuses.length === 1) {
     newTask.value.status = props.column.statuses[0]
-    newTask.value.id = Date.now()
-    newTask.value.startDate = new Date().toLocaleString()
+    newTask.value.id = `Task-${generateID()}`
+    newTask.value.startDate = Date.now()
     newTask.value.columnId = props.column.id
     props.column.tasksList.push({...newTask.value})
     newTaskPopupClose()
@@ -271,6 +320,24 @@ onUnmounted(() => {
     &:focus
       outline: none
       box-shadow: 0 0 5px #3f74e3
+.column-options-container
+  &__options
+    padding: 3px 0
+    display: flex
+    flex-direction: column
+    cursor: pointer
+    font-size: 12px
+    & .delete
+      color: #ff4747
+    & div
+      display: flex
+      align-items: center
+      padding: 5px 10px
+      & img
+        width: 15px
+        margin-right: 3px
+      &:hover
+        background-color: var(--task-hover-background-color)
 hr
   width: 300px
   margin-bottom: 10px
