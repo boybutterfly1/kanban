@@ -82,6 +82,7 @@ watch((route),() => {
   padding: 0 20px
   justify-content: space-between
   font-size: 13px
+  z-index: 30
   &__navigation
     display: flex
     margin-right: 5px

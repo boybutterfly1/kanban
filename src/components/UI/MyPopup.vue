@@ -29,7 +29,7 @@ const props = defineProps<{
   display: flex
   align-items: center
   justify-content: center
-  z-index: 100
+  z-index: 20
   background-color: rgb(0, 0, 0, 0.3)
 .popup-content
   position: absolute

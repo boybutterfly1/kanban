@@ -43,6 +43,19 @@ onMounted(() => {
   if (!usersStore.isLoggedIn) {
     router.push('/authorization')
   }
+  const boards = localStorage.getItem('boards')
+  if (JSON.parse(String(boards))) {
+    kanbanStore.boards = JSON.parse(String(boards))
+  }
+  if (JSON.parse(String(localStorage.getItem('darkMode')))) {
+    kanbanStore.darkMode = JSON.parse(String(localStorage.getItem('darkMode')))
+  }
+})
+watch(() => {return kanbanStore.boards},() => {
+  localStorage.setItem('boards', JSON.stringify(kanbanStore.boards))
+}, {deep: true})
+watch(() => {return  kanbanStore.darkMode}, () => {
+  localStorage.setItem('darkMode', JSON.stringify(kanbanStore.darkMode))
 })
 </script>
 

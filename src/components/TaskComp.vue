@@ -292,7 +292,7 @@ onBeforeUnmount(() => {
   background: white
   transition: right 0.3s
   overflow-y: auto
-  z-index: 100
+  z-index: 10
 .menu-open
   right: 0
 .task-options-container
