@@ -168,7 +168,7 @@ function openTaskDropdown() {
   }
   if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
   isTaskDropdownOpen.value = true
-  console.log('openDropdown', taskDropdownCoordinates.value, kanbanStore.openDropdowns, element, rect)
+  console.log('openDropdown', taskDropdownCoordinates.value, kanbanStore.openDropdowns, rect)
 }
 function closeTaskDropdown(id: string) {
   isTaskDropdownOpen.value = false
