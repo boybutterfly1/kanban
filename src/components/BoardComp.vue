@@ -388,7 +388,6 @@ function removeSelectedTasks() {
   kanbanStore.selectedTasks = []
 }
 function changeStatus() {
-  console.log(props.board.columns)
   kanbanStore.selectedTasks.forEach((selectedTask: Task) => {
     selectedTask.status = selectedTasksChangeStatus.value
     props.board.columns.forEach((column: Column) => {
@@ -403,7 +402,6 @@ function changeStatus() {
       }
     })
   })
-
   isSelectedTasksChangeStatusPopupOpen.value = false
   kanbanStore.selectedTasks = []
   selectedTasksChangeStatus.value = ''
