@@ -35,12 +35,13 @@ export const useTaskDragAndDropStore = defineStore('taskDragAndDrop', () => {
         dragTask.value.status = dropColumn.statuses[0]
       }
       dragTask.value.statusChangeDate = Date.now()
-      dropColumn.tasksList.push({...dragTask.value})
+      dropColumn.tasksList.push(dragTask.value)
     }
   }
   function deleteTaskFromDragColumn(dragColumnId: number | null) {
-    let dragColumn = null
-    board.value? dragColumn = board.value.columns.find((column: Column) => column.id === dragColumnId) : null
+    let dragColumn = board.value? board.value.columns.find((column: Column) => {
+      return column.id === dragColumnId || null
+    }) : null
     if (dragColumn) {
       dragColumn.tasksList = dragColumn.tasksList.filter((task: Task) => {
         return dragTask.value ? task.id !== dragTask.value.id : null

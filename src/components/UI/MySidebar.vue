@@ -2,6 +2,7 @@
   <div
       :class="{ 'is-open': isOpen }"
       class="sidebar"
+      @click.stop
   >
     <span class="sidebar__date">{{startDate}}</span>
     <hr>
@@ -21,7 +22,6 @@
       <div class="sidebar__parameters__parameter">
         <span class="sidebar__parameters__parameter__title">Status</span>
         <my-select
-            @click.stop
             :array="statusesArray"
             v-model="task.status"
             select-name="Task status"
@@ -31,7 +31,6 @@
       <div class="sidebar__parameters__parameter">
         <span class="sidebar__parameters__parameter__title">Priority</span>
         <my-select
-            @click.stop
             :enum="Priorities"
             v-model="task.priority"
             select-name="Task priority"
@@ -108,7 +107,10 @@ function changeStatus() {
   let availableColumn: Column | null = props.board.columns.find((column : Column) => {
     return column.statuses.includes(props.task.status)
   }) || null
-  availableColumn? availableColumn.tasksList.push(props.task) : null
+  if (availableColumn) {
+    availableColumn.tasksList.push(props.task)
+    props.task.columnId = availableColumn.id
+  }
   props.task.statusChangeDate = Date.now()
 }
 const handleClickOutside = (event: MouseEvent) => {

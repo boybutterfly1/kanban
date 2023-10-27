@@ -397,7 +397,10 @@ function changeStatus() {
       })
     })
     props.board.columns.forEach((column: Column) => {
-      if (column.statuses.includes(selectedTask.status)) column.tasksList.push({...selectedTask})
+      if (column.statuses.includes(selectedTask.status)) {
+        selectedTask.columnId = column.id
+        column.tasksList.push({...selectedTask})
+      }
     })
   })
 
