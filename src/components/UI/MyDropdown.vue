@@ -23,10 +23,9 @@ const elementToHide = ref<HTMLElement | null>(null);
 const handleClickOutside = (event: MouseEvent) => {
   if (elementToHide.value && !elementToHide.value.contains(event.target as Node)) {
     emits('close')
-    elementToHide.value = null
     kanbanStore.openDropdowns = []
   }
-};
+}
 onUpdated(() => {
   elementToHide.value = document.querySelector('.dropdown');
   const rect = elementToHide.value?.getBoundingClientRect()
@@ -51,7 +50,6 @@ watch(() => {return kanbanStore.openDropdowns[kanbanStore.openDropdowns.length -
   }
   if (openDropdown === props.dropdownId) {
     emits('close')
-    elementToHide.value = null
   }
 }, {deep: true})
 </script>

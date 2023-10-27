@@ -47,7 +47,7 @@
             src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png"
             alt="taskDetails"
             :id="task.id + 'dropdown'"
-            @click.stop="openEditTaskDropdown"
+            @click.stop="openTaskDropdown"
         >
       </div>
     </div>
@@ -62,7 +62,7 @@
   </div>
   <my-dropdown
       :is-open="isTaskDropdownOpen"
-      @close="isTaskDropdownOpen = false"
+      @close="closeTaskDropdown"
       :coordinates="taskDropdownCoordinates"
       :dropdownId="String(task.id) + 'dropdown'"
   >
@@ -158,7 +158,7 @@ function copyId() {
       });
 }
 
-function openEditTaskDropdown() {
+function openTaskDropdown() {
   const element = document.getElementById(String(props.task.id) + 'dropdown')
   const rect = element? element.getBoundingClientRect() : null
   taskDropdownCoordinates.value['top'] = rect? rect.top + rect.height : null
@@ -166,6 +166,9 @@ function openEditTaskDropdown() {
   kanbanStore.openDropdowns.push(String(props.task.id) + 'dropdown')
   if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
   isTaskDropdownOpen.value = true
+}
+function closeTaskDropdown() {
+  isTaskDropdownOpen.value = false
 }
 function openTaskSidebar() {
   kanbanStore.openSidebars.push(String(props.task.id) + '-sidebar')
@@ -175,12 +178,14 @@ function openTaskSidebar() {
 function selectTask() {
   isTaskDropdownOpen.value = false
   kanbanStore.selectedTasks.push(props.task)
+  kanbanStore.openDropdowns.pop()
 }
 function unselectTask() {
   isTaskDropdownOpen.value = false
   kanbanStore.selectedTasks = kanbanStore.selectedTasks.filter((task: Task) => {
     return task.id !== props.task.id
   })
+  kanbanStore.openDropdowns.pop()
 }
 function deleteTask() {
   props.column.tasksList = props.column.tasksList.filter((task: Task) => {
