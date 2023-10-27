@@ -37,6 +37,7 @@
           :key="task.id"
           :task="task"
           :column="column"
+          :board="board"
       />
       <div v-if="isDropArea">
         <div v-for="status in column.statuses">
@@ -316,7 +317,8 @@ onUnmounted(() => {
     border-radius: 5px
     border: 1px solid #7e7e7e
     background-color: var(--options-background-color)
-    padding: 2px 5px
+    padding: 5px 5px
+    color: var(--text-color)
     &:focus
       outline: none
       box-shadow: 0 0 5px #3f74e3

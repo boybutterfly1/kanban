@@ -62,6 +62,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     },
   ]);
   const openDropdowns = ref<string[]>([])
+  const openSidebars = ref<string[]>([])
   const searchValue = ref<string>('')
   const isLoading = ref<boolean>(false)
 
@@ -80,6 +81,9 @@ export const useKanbanStore = defineStore('kanban', () => {
       isLoading.value = false
     }, 2500);
   }
+  function getStatusClass(status: string): string {
+    return ['__status', status.toLowerCase().replace(' ', '-')].join(' ')
+  }
 
   return {
     darkMode,
@@ -92,6 +96,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     selectedTasks,
     isLoading,
     openDropdowns,
-    changePage
+    openSidebars,
+    changePage,
+    getStatusClass
   }
 })

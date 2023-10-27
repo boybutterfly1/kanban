@@ -388,6 +388,7 @@ function removeSelectedTasks() {
   kanbanStore.selectedTasks = []
 }
 function changeStatus() {
+  console.log(props.board.columns)
   kanbanStore.selectedTasks.forEach((selectedTask: Task) => {
     selectedTask.status = selectedTasksChangeStatus.value
     props.board.columns.forEach((column: Column) => {
@@ -396,7 +397,7 @@ function changeStatus() {
       })
     })
     props.board.columns.forEach((column: Column) => {
-      if (column.statuses.includes(selectedTask.status)) column.tasksList.push(selectedTask)
+      if (column.statuses.includes(selectedTask.status)) column.tasksList.push({...selectedTask})
     })
   })
 
