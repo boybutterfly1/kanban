@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeMount, onMounted, onUpdated, ref, watch} from "vue";
+import {onBeforeMount, onMounted, onUnmounted, onUpdated, ref, watch} from "vue";
 import {useKanbanStore} from "@/store/kanban";
 
 const kanbanStore = useKanbanStore()
@@ -40,7 +40,7 @@ onUpdated(() => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 })
-onBeforeMount(() => {
+onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 })
 watch(() => {return kanbanStore.openDropdowns[kanbanStore.openDropdowns.length - 2]}, () => {
@@ -50,6 +50,7 @@ watch(() => {return kanbanStore.openDropdowns[kanbanStore.openDropdowns.length -
   }
   if (openDropdown === props.dropdownId) {
     emits('close')
+    elementToHide.value = null
   }
 }, {deep: true})
 </script>
