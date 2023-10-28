@@ -46,7 +46,7 @@
             class="task__header__right-side__btn"
             src="https://img.icons8.com/ios-glyphs/30/7e7e7e/more.png"
             alt="taskDetails"
-            :id="String(task.id) + '-dropdown'"
+            :id="String(task.id) + '-task'"
             @click.stop="openTaskDropdown"
         >
       </div>
@@ -62,9 +62,9 @@
   </div>
   <my-dropdown
       :is-open="isTaskDropdownOpen"
-      @close="closeTaskDropdown"
+      :id="task.id"
       :coordinates="taskDropdownCoordinates"
-      :dropdownId="String(task.id) + '-dropdown'"
+      @close="isTaskDropdownOpen = false"
   >
     <div class="task-options-container">
       <div
@@ -96,7 +96,7 @@
   </my-dropdown>
   <my-sidebar
       :is-open="taskSidebarIsOpen"
-      :sidebar-id="String(task.id) + '-sidebar'"
+      :id="task.id"
       :task="task"
       :column="column"
       :board="board"
@@ -150,63 +150,54 @@ const timer = computed<string>(() => {
 })
 function copyId() {
   navigator.clipboard.writeText(String(props.task.id))
-      .then(() => {
-        isTaskIdCopied.value = true
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    .then(() => {
+      isTaskIdCopied.value = true
+    })
+    .catch(error => {
+      console.error(error);
+    });
 }
 
 function openTaskDropdown() {
-  const element = document.getElementById(String(props.task.id) + '-dropdown')
+  const element = document.getElementById(String(props.task.id) + '-task')
   const rect = element? element.getBoundingClientRect() : null
   taskDropdownCoordinates.value['top'] = rect? rect.top + rect.height : null
   taskDropdownCoordinates.value['left'] = rect? rect.left : null
-  if (kanbanStore.openDropdowns[1] !== (String(props.task.id) + '-dropdown')) {
-    kanbanStore.openDropdowns.push(String(props.task.id) + '-dropdown')
-  }
-  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
+  kanbanStore.openDropdown = String(props.task.id) + '-dropdown'
   isTaskDropdownOpen.value = true
-  console.log('openDropdown', taskDropdownCoordinates.value, kanbanStore.openDropdowns, rect)
-}
-function closeTaskDropdown(id: string) {
-  isTaskDropdownOpen.value = false
-  taskDropdownCoordinates.value['top'] = null
-  taskDropdownCoordinates.value['left'] = null
-  console.log('close ', String(props.task.id) + '-dropdown')
 }
 function openTaskSidebar() {
-  kanbanStore.openSidebars.push(String(props.task.id) + '-sidebar')
-  if (kanbanStore.openSidebars.length > 2) kanbanStore.openSidebars.shift()
+  kanbanStore.openSidebar = String(props.task.id) + '-sidebar'
   taskSidebarIsOpen.value = true
 }
 function selectTask() {
   isTaskDropdownOpen.value = false
   kanbanStore.selectedTasks.push(props.task)
-  kanbanStore.openDropdowns.pop()
 }
 function unselectTask() {
   isTaskDropdownOpen.value = false
   kanbanStore.selectedTasks = kanbanStore.selectedTasks.filter((task: Task) => {
     return task.id !== props.task.id
   })
-  kanbanStore.openDropdowns.pop()
 }
 function deleteTask() {
   props.column.tasksList = props.column.tasksList.filter((task: Task) => {
     return task.id !== props.task.id
   })
+  unselectTask()
 }
-function handleScroll() {
-  isTaskDropdownOpen.value = false
-}
-onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-})
-onBeforeUnmount(() => {
-  window.removeEventListener("scroll", handleScroll);
-})
+// function handleScroll() {
+//   const element = document.getElementById(String(props.task.id) + '-task')
+//   const rect = element? element.getBoundingClientRect() : null
+//   taskDropdownCoordinates.value['top'] = rect? rect.top + rect.height : null
+//   taskDropdownCoordinates.value['left'] = rect? rect.left : null
+// }
+// onMounted(() => {
+//   window.addEventListener("scroll", handleScroll);
+// })
+// onBeforeUnmount(() => {
+//   window.removeEventListener("scroll", handleScroll);
+// })
 
 </script>
 

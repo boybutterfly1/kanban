@@ -2,6 +2,7 @@
   <div
       :class="{ 'is-open': isOpen }"
       class="sidebar"
+      :id="String(id) + '-sidebar'"
       @click.stop
   >
     <span class="sidebar__date">{{startDate}}</span>
@@ -49,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeMount, onMounted, ref, watch, computed} from "vue";
+import {onMounted, ref, watch, computed, onBeforeUnmount} from "vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board, Column, Priorities, Task} from "@/types/types";
 import MySelect from "@/components/UI/MySelect.vue";
@@ -57,7 +58,7 @@ import MySelect from "@/components/UI/MySelect.vue";
 const kanbanStore = useKanbanStore()
 const props = defineProps<{
   isOpen: boolean
-  sidebarId: string
+  id: number | string | null
   task: Task
   column: Column
   board: Board
@@ -113,28 +114,26 @@ function changeStatus() {
   }
   props.task.statusChangeDate = Date.now()
 }
+function close() {
+  if (kanbanStore.openSidebar !== String(props.id) + '-sidebar') {
+    emits('close')
+  }
+}
 const handleClickOutside = (event: MouseEvent) => {
   if (elementToHide.value && !elementToHide.value.contains(event.target as Node)) {
     emits('close')
-    kanbanStore.openSidebars = []
   }
 }
 onMounted(() => {
-  elementToHide.value = document.querySelector('.sidebar');
+  elementToHide.value = document.getElementById(String(props.id) + '-sidebar');
   document.addEventListener('click', handleClickOutside);
 })
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 })
-watch(() => {return kanbanStore.openSidebars[kanbanStore.openSidebars.length - 2]}, () => {
-  let openSidebar: string = ''
-  if (kanbanStore.openSidebars.length > 1) {
-    openSidebar = kanbanStore.openSidebars[kanbanStore.openSidebars.length - 2]
-  }
-  if (openSidebar === props.sidebarId) {
-    emits('close')
-  }
-}, {deep: true})
+watch(() => {return kanbanStore.openSidebar}, () => {
+  close()
+})
 </script>
 
 <style lang="sass">

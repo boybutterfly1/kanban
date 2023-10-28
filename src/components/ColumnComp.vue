@@ -26,7 +26,7 @@
           <img
               src=https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png
               alt="edit column"
-              :id="column.id + 'edit-column'"
+              :id="column.id + 'column'"
               @click.stop="openColumnDropdown"
           >
         </div>
@@ -104,7 +104,7 @@
       :is-open="isColumnDropdownOpen"
       @close="isColumnDropdownOpen = false"
       :coordinates="columnDropdownCoordinates"
-      :dropdownId="String(column.id) + 'edit-column'"
+      :id="column.id"
   >
     <div class="column-options-container">
       <div class="column-options-container__options">
@@ -122,7 +122,7 @@
 import TaskComp from "@/components/TaskComp.vue";
 import {useKanbanStore} from "@/store/kanban";
 import {Board, Column, Priorities, Task} from "@/types/types";
-import {computed, onUnmounted, ref} from "vue";
+import {computed, onUnmounted, onBeforeUnmount, onMounted, ref} from "vue";
 import {useUsersStore} from "@/store/users";
 import MyPopup from "@/components/UI/MyPopup.vue";
 import MyButton from "@/components/UI/MyButton.vue";
@@ -166,12 +166,11 @@ const isDropArea = computed<boolean>(() => {
   return  isColumnNameNotOpen() && isDragColNotDropCol() && taskDADStore.isDroppableArea
 })
 function openColumnDropdown() {
-  const element = document.getElementById(String(props.column.id) + 'edit-column')
+  const element = document.getElementById(String(props.column.id) + 'column')
   const rect = element? element.getBoundingClientRect() : null
   columnDropdownCoordinates.value['top'] = rect? rect.top + rect.height  : null
   columnDropdownCoordinates.value['left'] = rect? rect.left : null
-  kanbanStore.openDropdowns.push(String(props.column.id) + 'edit-column')
-  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
+  kanbanStore.openDropdown = String(props.column.id) + '-dropdown'
   isColumnDropdownOpen.value = true
 }
 function deleteColumn() {
@@ -245,6 +244,15 @@ function addNewTask() {
 }
 onUnmounted(() => {
   kanbanStore.searchValue = ''
+})
+function handleScroll() {
+  isColumnDropdownOpen.value = false
+}
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+})
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", handleScroll);
 })
 </script>
 

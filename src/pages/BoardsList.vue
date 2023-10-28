@@ -43,7 +43,7 @@
                   @click.stop="openBoardDropdown(board.id)"
                   src="https://img.icons8.com/ios-glyphs/50/7e7e7e/more.png"
                   alt="dropdown"
-                  :id="board.id + 'edit-board'"
+                  :id="board.id + '-board'"
               >
             </td>
           </tr>
@@ -52,8 +52,8 @@
     </div>
   </div>
   <my-dropdown
-      :dropdown-id="String(currentBoardId) + 'edit-column'"
       :is-open="isBoardDropdownOpen"
+      :id="currentBoardId"
       :coordinates="boardDropdownCoordinates"
       @close="isBoardDropdownOpen = false"
       direction="left"
@@ -109,23 +109,22 @@ const newBoard = ref<Board>({
   columns: [],
   availableStatuses : [...kanbanStore.statuses]
 })
-const currentBoardId = ref<number | null>(null)
 const boardDropdownCoordinates = ref<Record<string, number | null>>({
   top: null,
   left: null
 })
+const currentBoardId = ref<number | null>(null)
 const isBoardDropdownOpen = ref(false)
 const searchBoards = computed<Board[]>(() => {
   return kanbanStore.boards.filter((board: Board) => board.name.toLowerCase().includes(kanbanStore.searchValue.toLowerCase()))
 })
 function openBoardDropdown(id: number| null) {
   currentBoardId.value = id
-  const element = document.getElementById(String(id) + 'edit-board')
+  const element = document.getElementById(String(id) + '-board')
   const rect = element? element.getBoundingClientRect() : null
   boardDropdownCoordinates.value['top'] = rect? rect.top + rect.height  : null
   boardDropdownCoordinates.value['left'] = rect? rect.left + rect.width: null
-  kanbanStore.openDropdowns.push(String(id) + 'edit-board')
-  if (kanbanStore.openDropdowns.length > 2) kanbanStore.openDropdowns.shift()
+  kanbanStore.openDropdown = String(id) + '-dropdown'
   isBoardDropdownOpen.value = true
 }
 function deleteBoard(id: number | null) {

@@ -61,11 +61,10 @@ export const useKanbanStore = defineStore('kanban', () => {
       availableStatuses: ['Testing', 'Closed']
     },
   ]);
-  const openDropdowns = ref<string[]>([])
-  const openSidebars = ref<string[]>([])
+  const openDropdown = ref<string>('')
+  const openSidebar = ref<string>('')
   const searchValue = ref<string>('')
   const isLoading = ref<boolean>(false)
-
   const searchTasks = computed<Task[]>((array: Task[]) => {
     return array.filter((task: Task) => task.name.toLowerCase().includes(searchValue.value.toLowerCase()))
   })
@@ -95,8 +94,8 @@ export const useKanbanStore = defineStore('kanban', () => {
     searchBoards,
     selectedTasks,
     isLoading,
-    openDropdowns,
-    openSidebars,
+    openDropdown,
+    openSidebar,
     changePage,
     getStatusClass
   }
